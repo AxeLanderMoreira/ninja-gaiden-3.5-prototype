@@ -19,7 +19,7 @@ This project utilizes Phaser 3 Game Engine, which works as an abstraction layer 
 ![alt text](screenshots/01.png "Screenshot")
 
 
---
+---
 
 ## Live demo 
 
