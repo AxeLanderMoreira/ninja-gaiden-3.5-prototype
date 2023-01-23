@@ -23,6 +23,7 @@ export default class TitleScreen extends Phaser.Scene {
     padPlugin: Phaser.Input.Gamepad.GamepadPlugin;
     fullscreen: boolean;
     touchConfirmed: integer;
+    transitionInProgress: boolean;
 
     constructor() {
         console.log('[constructor@TitleScreen] IN');
@@ -33,6 +34,7 @@ export default class TitleScreen extends Phaser.Scene {
         this.numPads = 0;
         this.fullscreen = false;
         this.touchConfirmed = 0;
+        this.transitionInProgress = false;
         console.log('[constructor@TitleScreen] OUT');
     }
 
@@ -95,6 +97,8 @@ export default class TitleScreen extends Phaser.Scene {
     }
 
     private _startGame() {
+        if (this.transitionInProgress) return;
+        this.transitionInProgress = true;
         this.cameras.main.fadeOut(1000, 0, 0, 0, (_camera, _progress) => {
             if (_progress >= 1) {                
                 this.scene.start('Scene21Desert', {numPlayers: 1 + this.numPads, touch: (this.touchConfirmed == 2)});

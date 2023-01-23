@@ -15,12 +15,12 @@ export default class PowerUp extends Entity {
     static readonly BLAST_DOWN = 5;
     static readonly SLICE_UP_DOWN = 6;
     static readonly MAX_MANA = 7;
-    static readonly EXTRA_LIFE = 8;
+    static readonly ONE_UP = 8;
+    static readonly HP_UP = 9;
     static initAnims(scene: GameSegment) {
-        for (let i = PowerUp.MANA; i <= PowerUp.EXTRA_LIFE; i++) {
+        for (let i = PowerUp.MANA; i <= PowerUp.HP_UP; i++) {
             console.log('[PowerUp.initAnim] Creating animation for power up #' + i);
-            //scene.createAnim('power_up', i, 'glow', {frames: [i, i, i, 9, i, i, i, 10]}, 500, -1);
-            scene.createAnim('power_up', i, 'glow', {frames: [i, i, i, i, 9, 10]}, 500, -1);
+            scene.createAnim('power_up', i, 'glow', {frames: [i, i, i, i, 10, 11]}, 500, -1);
             scene.createAnim('power_up', i, 'fall', {frames: [i]}, 200, -1);
         }      
     }

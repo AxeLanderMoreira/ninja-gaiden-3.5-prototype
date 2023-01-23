@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="240" height="14" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="46">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="240" height="14" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="47">
  <editorsettings>
   <export target="Tilemap2-1.json" format="json"/>
  </editorsettings>
@@ -7,8 +7,8 @@
  <tileset firstgid="33" name="Enemies" tilewidth="32" tileheight="32" tilecount="5" columns="5">
   <image source="../../../EnemiesForPlacement.png" width="160" height="32"/>
  </tileset>
- <tileset firstgid="38" name="PowerUp" tilewidth="16" tileheight="16" tilecount="11" columns="11">
-  <image source="../../../PowerUp.png" width="176" height="16"/>
+ <tileset firstgid="38" name="PowerUp" tilewidth="16" tileheight="16" tilecount="12" columns="12">
+  <image source="../../../PowerUp.png" width="192" height="16"/>
  </tileset>
  <layer id="5" name="Background" width="240" height="14">
   <data encoding="csv">
@@ -101,5 +101,6 @@
   <object id="43" gid="44" x="1259" y="76" width="16" height="16"/>
   <object id="44" gid="45" x="2406" y="71" width="16" height="16"/>
   <object id="45" gid="46" x="3024" y="72" width="16" height="16"/>
+  <object id="46" gid="47" x="735.455" y="65.4545" width="16" height="16"/>
  </objectgroup>
 </map>

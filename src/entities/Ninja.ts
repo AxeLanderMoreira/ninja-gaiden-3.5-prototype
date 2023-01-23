@@ -23,6 +23,7 @@ export default class Ninja extends Entity {
     static readonly INITIAL_MAX_MANA = 40;   // Upon getting the max mana increase power up
     static readonly MANA_INCREMENT = 10;     
     static readonly MAX_MANA_INCREMENT = 10; // Upon getting the max mana increase power up
+    static readonly HP_INCREMENT = 6;
     static readonly JUMP_SPEED = -250; // Initial jump velocity Y
     static readonly MAX_NUM_PLAYERS = 4;
     readonly slash_offset = {
@@ -259,9 +260,14 @@ export default class Ninja extends Entity {
             case PowerUp.MAX_MANA:
                 this.maxMana += Ninja.MAX_MANA_INCREMENT;
                 break;
-            case PowerUp.EXTRA_LIFE:
+            case PowerUp.ONE_UP:
                 this.lives++;
                 break;
+            case PowerUp.HP_UP:
+                this.hp += Ninja.HP_INCREMENT;
+                if (this.hp > Ninja.MAX_HP) {
+                    this.hp = Ninja.MAX_HP;
+                }
         }
     }
 
