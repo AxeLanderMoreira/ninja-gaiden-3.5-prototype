@@ -1,0 +1,54 @@
+// Copyright (c) 2023 Alexandre Moreira
+// 
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+import ControlMethod from "./ControlMethod";
+
+export default class KeyboardControlMethod extends ControlMethod {
+    static readonly DEFAULT_MAPPED_A_BUTTON = 'Z';
+    static readonly DEFAULT_MAPPED_B_BUTTON = 'X';
+    aKey: Phaser.Input.Keyboard.Key;
+    bKey: Phaser.Input.Keyboard.Key;
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    
+    constructor(scene: Phaser.Scene) {
+        super();
+        this.resetScene(scene);
+    };
+
+    hit(btn: string): boolean {
+        switch(btn) {
+            case 'a': return Phaser.Input.Keyboard.JustDown(this.aKey);
+            case 'b': return Phaser.Input.Keyboard.JustDown(this.bKey);
+            case 'up': return Phaser.Input.Keyboard.JustDown(this.cursors.up);
+            case 'down': return Phaser.Input.Keyboard.JustDown(this.cursors.down);
+            case 'left': return Phaser.Input.Keyboard.JustDown(this.cursors.left);
+            case 'right': return Phaser.Input.Keyboard.JustDown(this.cursors.right);
+            default: return false;
+        }
+    };
+    
+    held(btn: string): boolean {
+        switch(btn) {
+            case 'a': return this.aKey.isDown; 
+            case 'b': return this.bKey.isDown;
+            case 'up': return this.cursors.up.isDown;
+            case 'down': return this.cursors.down.isDown;
+            case 'left': return this.cursors.left.isDown;
+            case 'right': return this.cursors.right.isDown;
+            default: return false;
+        }
+    };
+
+    // redefined from base class
+    resetScene(scene: Phaser.Scene) {
+        this.aKey = scene.input.keyboard.addKey(KeyboardControlMethod.DEFAULT_MAPPED_A_BUTTON); // A
+        this.bKey = scene.input.keyboard.addKey(KeyboardControlMethod.DEFAULT_MAPPED_B_BUTTON); // B 
+        this.cursors = scene.input.keyboard.createCursorKeys();
+    }
+
+    update():void {
+        
+    };
+}
