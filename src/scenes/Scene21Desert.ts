@@ -160,7 +160,7 @@ export default class Scene21Desert extends GameSegment {
     }
 
     update(time: number, delta: number): void {  
-        super.update(time, delta); // TODO Move to top?
+        super.update(time, delta);
         if (this.stopping) {
             return;
         }

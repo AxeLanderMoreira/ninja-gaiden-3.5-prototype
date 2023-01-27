@@ -11,10 +11,13 @@ export default class GamepadControlMethod extends ControlMethod {
     pad: Phaser.Input.Gamepad.Gamepad;
     prevStatus: any;
     currStatus: any;
+    private static s_instances: GamepadControlMethod[];
+    index: integer;
     
-    constructor(scene: Phaser.Scene, index: integer) {
+    private constructor(scene: Phaser.Scene, index: integer) {
         console.log('[GamepadControlMethod] constructor - IN');
         super();
+        this.index = index;
         this.pad = scene.input.gamepad.gamepads[index];
         this.currStatus = {
             a: false,
@@ -35,13 +38,31 @@ export default class GamepadControlMethod extends ControlMethod {
         console.log('[GamepadControlMethod] constructor - OUT');
     };
 
+    static get(scene: Phaser.Scene, index: integer) {
+        if (!this.s_instances) {
+            this.s_instances = [];
+        }
+        if (this.s_instances.length <= index) {
+            this.s_instances.push(new GamepadControlMethod(scene, index));
+        } else {
+            this.s_instances[index].resetScene(scene);
+        }
+        return this.s_instances[index];
+    }
+
     hit(btn: string): boolean {
-        return (this.currStatus[btn] && !this.prevStatus[btn]);
+        let ret: boolean = this.currStatus[btn] && !this.prevStatus[btn];
+        return ret;
     };
     
     held(btn: string): boolean {
         return this.currStatus[btn];
     };
+
+    // redefined from base class
+    resetScene(scene: Phaser.Scene) {
+        this.pad = scene.input.gamepad.gamepads[this.index];
+    }
 
     update():void {
         //console.log('[GamepadControlMethod.update] IN');

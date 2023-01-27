@@ -10,7 +10,7 @@ import SpriteFont from "./SpriteFont";
 export default abstract class Hud {    
     scene: GameSegment;
     bounds: Phaser.Geom.Rectangle;
-    container: any;
+    container: Phaser.GameObjects.Container;
     font: SpriteFont;
 
     /**

@@ -3,14 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-export default abstract class ControlMethod {
-    /**
-     * Checks if a D-PAD or action button has just been pressed.
-     * @param btn May be 'a', 'b', 'up', 'down', 'left', 'right'
-     * @returns true if the button in question has just been pressed (that is,
-     * it was not pressed in the immediately previous frame).
-     */
-    abstract hit(btn: string): boolean;
+export default abstract class ControlMethod {    
     /**
      * Checks if a D-PAD or action button is being helddown.
      * @param btn May be 'a', 'b', 'up', 'down', 'left', 'right'
@@ -18,6 +11,14 @@ export default abstract class ControlMethod {
      * regardless of its state in the immediately previous frame).
      */
     abstract held(btn: string): boolean;
+
+    /**
+     * Checks if a D-PAD or action button has just been pressed.
+     * @param btn May be 'a', 'b', 'up', 'down', 'left', 'right'
+     * @returns true if the button in question has just been pressed (that is,
+     * it was not pressed in the immediately previous frame).
+     */
+    abstract hit(btn: string): boolean;
 
     /**
      * Whenever a Scene restarts or changes to another, the ControlMethod needs 

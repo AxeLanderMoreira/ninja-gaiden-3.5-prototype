@@ -24,11 +24,11 @@ export default class VirtualPadControlMethod extends ControlMethod {
     hitAreaUp: Phaser.Geom.Triangle;
     hitAreaLeft: Phaser.Geom.Triangle;
     hitAreaRight: Phaser.Geom.Triangle;
+    private static s_instance: VirtualPadControlMethod;
 
-    constructor(scene: Phaser.Scene) {
+    private constructor(scene: Phaser.Scene) {
         console.log('[VirtualPadControlMethod] constructor - IN');
         super();
-        //this.scene = scene;
         this.currStatus = {
             a: false,
             b: false,
@@ -46,6 +46,45 @@ export default class VirtualPadControlMethod extends ControlMethod {
             right: false
         };
 
+        this.hitAreaA = new Phaser.Geom.Triangle(0, 0, 80, 80, 0, 80);
+        this.hitAreaB = new Phaser.Geom.Triangle(0, 0, 80, 0, 80, 80);
+        this.hitAreaUp = new Phaser.Geom.Triangle(0, 0, 80, 0, 40, 40);
+        this.hitAreaDown = new Phaser.Geom.Triangle(0, 80, 40, 40, 80, 80);
+        this.hitAreaLeft = new Phaser.Geom.Triangle(0, 0, 40, 40, 0, 80);
+        this.hitAreaRight = new Phaser.Geom.Triangle(80, 0, 40, 40, 80, 80);
+
+        this.resetScene(scene);
+        
+        console.log('[VirtualPadControlMethod] constructor - OUT');
+    }
+
+    static get(scene:Phaser.Scene) {
+        if (!this.s_instance) {
+            this.s_instance = new VirtualPadControlMethod(scene);
+        } else {
+            this.s_instance.resetScene(scene);            
+        }
+        return this.s_instance;
+    }
+
+    /**
+     * 
+     * @param btn 
+     */
+    hit(btn: string): boolean {
+        return (this.currStatus[btn] && !this.prevStatus[btn]);
+    }
+
+    /**
+     * 
+     * @param btn 
+     */
+    held(btn: string): boolean {
+        return this.currStatus[btn];
+    }
+
+    // redefined from base class
+    resetScene(scene: Phaser.Scene) {
         this.dPadImg = scene.add.image(4, 132, 'virtual_dpad');
         this.dPadImg.alpha = .5;
         this.dPadImg.setOrigin(0, 0);
@@ -58,13 +97,7 @@ export default class VirtualPadControlMethod extends ControlMethod {
         this.btnImg.setDepth(Globals.VIRTUAL_CONTROLS_DEPTH);
         this.btnImg.setInteractive();
         this.btnImg.setScrollFactor(0);
-        this.hitAreaA = new Phaser.Geom.Triangle(0, 0, 80, 80, 0, 80);
-        this.hitAreaB = new Phaser.Geom.Triangle(0, 0, 80, 0, 80, 80);
-        this.hitAreaUp = new Phaser.Geom.Triangle(0, 0, 80, 0, 40, 40);
-        this.hitAreaDown = new Phaser.Geom.Triangle(0, 80, 40, 40, 80, 80);
-        this.hitAreaLeft = new Phaser.Geom.Triangle(0, 0, 40, 40, 0, 80);
-        this.hitAreaRight = new Phaser.Geom.Triangle(80, 0, 40, 40, 80, 80);
-
+        
         this.dPadImg.on('pointerdown', pointer => {
             let _x = pointer.x - this.dPadImg.x;
             let _y = pointer.y - this.dPadImg.y;
@@ -108,8 +141,7 @@ export default class VirtualPadControlMethod extends ControlMethod {
         this.dPadImg.on('pointerout', pointer => {
             this.up = this.down = this.left = this.right = false;
         });
-
-
+        
         this.btnImg.on('pointerdown', pointer => {
             let _x = pointer.x - this.btnImg.x;
             let _y = pointer.y - this.btnImg.y;
@@ -159,24 +191,6 @@ export default class VirtualPadControlMethod extends ControlMethod {
         this.btnImg.on('pointerout', pointer => {
             this.a = this.b = false;            
         });
-        
-        console.log('[VirtualPadControlMethod] constructor - OUT');
-    }
-
-    /**
-     * 
-     * @param btn 
-     */
-    hit(btn: string): boolean {
-        return (this.currStatus[btn] && !this.prevStatus[btn]);
-    }
-
-    /**
-     * 
-     * @param btn 
-     */
-    held(btn: string): boolean {
-        return this.currStatus[btn];
     }
 
     /**

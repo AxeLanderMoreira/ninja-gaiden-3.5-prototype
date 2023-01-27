@@ -123,6 +123,12 @@ export default class SpriteFont {
         });
     }
 
+    setAlpha(glyphs: Phaser.GameObjects.Sprite[], alpha: number) {
+        glyphs.forEach((g) => {
+            g.setAlpha(alpha);
+        });
+    }
+
     setVisible(glyphs: Phaser.GameObjects.Sprite[], on: boolean) {
         glyphs.forEach((g) => {
             g.setVisible(on);

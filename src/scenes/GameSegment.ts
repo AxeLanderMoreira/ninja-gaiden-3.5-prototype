@@ -3,63 +3,65 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import BaseScene from "./BaseScene";
+import ControlMethod from "../input/ControlMethod";
 import DroidBall from "../entities/DroidBall";
 import EnemyAlien from "../entities/EnemyAlien";
 import EnemySoldier from "../entities/EnemySoldier";
 import Entity from "../entities/Entity";
 import EntityFactory from "../entities/EntityFactory";
 import Explod from "../entities/Explod";
-import Ninja from "../entities/Ninja";
-import PowerUp from "../entities/PowerUp";
-import { Globals } from "../Globals";
-import ControlMethod from "../input/ControlMethod";
+import FpsHud from "../menus/FpsHud";
 import GamepadControlMethod from "../input/GamepadControlMethod";
 import KeyboardControlMethod from "../input/KeyboardControlMethod";
-import VirtualPadControlMethod from "../input/VirtualPadControlMethod";
-import FpsHud from "../menus/FpsHud";
+import { Globals } from "../Globals";
+import Ninja from "../entities/Ninja";
 import PlayerHud from "../menus/PlayerHud";
+import PowerUp from "../entities/PowerUp";
 import TimeHud from "../menus/TimeHud";
+import VirtualPadControlMethod from "../input/VirtualPadControlMethod";
 
 /**
  * Contains all logic common to every Scene in this Game.
  */
-export default abstract class GameSegment extends Phaser.Scene {
-    players: Ninja[];   // for general logic and state machine
-    enemies: Entity[];  // for general logic and state machine
-    powerUps: Entity[]; // for general logic and state machine
-    playerGroup: Phaser.Physics.Arcade.Group;  // for physics and collision handling
-    enemyGroup: Phaser.Physics.Arcade.Group;   // for physics and collision handling
-    powerUpGroup: Phaser.Physics.Arcade.Group; // for physics and collision handling
-    platformGroup: Phaser.Physics.Arcade.StaticGroup;
-    playerHuds: PlayerHud[];
-    initialTimerValue: number;  // time to beat this level, in milliseconds
-    currTimerValue: number;     // countdown, also in milliseconds
-    prevScrollX: number;  // camera's horizontal scroll position in previous frame (for optimizing respawning of new enemies)
-    prevScrollY: number;  // camera's vertical scroll position in previous frame (same as above)
-    mapEnemiesLayer: Phaser.Tilemaps.ObjectLayer;
-    mapPowerUpsLayer: Phaser.Tilemaps.ObjectLayer;
-    mapWallsLayer: Phaser.Tilemaps.ObjectLayer;
+export default abstract class GameSegment extends BaseScene {
+    
     readonly ENEMY_SPAWN_MARGIN = 32; /**< amount of pixels extrapolating the 
     camera's visible area, on each of the four sides. When that extrapolated
     rectangle overlaps with the rectangle of an enemy placed in the map, the
     corresponding enemy will then be spawned into the game. */
-
     // TODO These spawn positions should actually vary depending on each level
+    static readonly PLAYER_SPAWN_H_SPACING = 32; /** Horizontal spacing between each Player's spawn area */
     static readonly PLAYER1_SPAWN_X = 64; /**< X-Position where to spawn Ninja Player 1 */
     static readonly PLAYER1_SPAWN_Y = -32;
-    static readonly PLAYER_SPAWN_H_SPACING = 32; /** Horizontal spacing between each Player's spawn area */
 
-    ctrlMethods: ControlMethod[];
-    timeHud: TimeHud;
-    t0: number;
-    fpsHud: FpsHud;
-    enemyNinjaCollider: Phaser.Physics.Arcade.Collider;
-    platformNinjaCollider: Phaser.Physics.Arcade.Collider;
-    stopping: boolean;
-    numPlayers: integer;
-    touch: boolean;
+    assignedIndices: integer[];
     camFocusPoint: Phaser.GameObjects.GameObject;
-
+    ctrlMethods: ControlMethod[];
+    currTimerValue: number;     // countdown, also in milliseconds
+    enemies: Entity[];  // for general logic and state machine
+    enemyGroup: Phaser.Physics.Arcade.Group;   // for physics and collision handling
+    enemyNinjaCollider: Phaser.Physics.Arcade.Collider;
+    fpsHud: FpsHud;
+    initialTimerValue: number;  // time to beat this level, in milliseconds
+    mapEnemiesLayer: Phaser.Tilemaps.ObjectLayer;
+    mapPowerUpsLayer: Phaser.Tilemaps.ObjectLayer;
+    mapWallsLayer: Phaser.Tilemaps.ObjectLayer;
+    numPlayers: integer;
+    platformGroup: Phaser.Physics.Arcade.StaticGroup;
+    platformNinjaCollider: Phaser.Physics.Arcade.Collider;
+    playerGroup: Phaser.Physics.Arcade.Group;  // for physics and collision handling
+    playerHuds: PlayerHud[];
+    players: Ninja[];   // for general logic and state machine
+    powerUpGroup: Phaser.Physics.Arcade.Group; // for physics and collision handling
+    powerUps: Entity[]; // for general logic and state machine
+    prevScrollX: number;  // camera's horizontal scroll position in previous frame (for optimizing respawning of new enemies)
+    prevScrollY: number;  // camera's vertical scroll position in previous frame (same as above)      
+    stopping: boolean;
+    t0: number;
+    timeHud: TimeHud;
+    touch: boolean;
+    
     constructor(config:string) {
         super(config);
         this.enemies = [];
@@ -102,9 +104,11 @@ export default abstract class GameSegment extends Phaser.Scene {
       return arr;
     }
 
-    create(data?: any) {
-        this.numPlayers = data ? data.numPlayers : 1;
-        this.touch = data.touch; // touch screen, means we need to provide virtual d-pad and buttons
+    create(ctx?: any) {
+        super.create(ctx);
+        this.numPlayers = ctx ? ctx.numPlayers : 1;
+        this.assignedIndices = ctx.assignedIndices;
+        this.touch = ctx.touch; // touch screen, means we need to provide virtual d-pad and buttons
         const sprites = this._createNinjaSprites();
         const swords = this._createSwordSprites();        
 
@@ -127,21 +131,25 @@ export default abstract class GameSegment extends Phaser.Scene {
         Ninja.initAnims(this);
 
         let ctrl: ControlMethod;
-        if (!this.players) {          
+        if (!this.players) {
           this.players = [];
-          this.ctrlMethods = [];
+          console.log("[GameSegment.create] this.ctrlMethods.length = " + this.ctrlMethods.length);
+          console.log("[GameSegment.create] this.numPlayers = " + this.numPlayers);
+          /*this.ctrlMethods = [];*/
           for (let i = 0; i < this.numPlayers; i++) {
-            if (i == 0) {
-              ctrl = this.touch ? new VirtualPadControlMethod(this) : new KeyboardControlMethod(this);
+            /*if (i == 0) {
+              ctrl = this.touch ? VirtualPadControlMethod.get(this) : KeyboardControlMethod.get(this);
             } else {
-              ctrl = new GamepadControlMethod(this, i - 1);
+              ctrl = GamepadControlMethod.get(this, i - 1);
             }
-            this.ctrlMethods.push(ctrl);
+            this.ctrlMethods.push(ctrl);*/
+            //let ctrl = this.ctrlMethods[i];
+            let ctrl = this.ctrlMethods[this.assignedIndices[i]];
             this.players.push(new Ninja(this, ctrl, sprites[i], swords[i]));
           }
         } else {
           this.players.forEach((player, i) => {
-            this.ctrlMethods[i].resetScene(this);
+            //this.ctrlMethods[i].resetScene(this);
             player.respawn(sprites[i], swords[i]);
           })
         }

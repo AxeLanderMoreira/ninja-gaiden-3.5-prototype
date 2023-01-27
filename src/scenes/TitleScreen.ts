@@ -3,25 +3,27 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { Globals } from "../Globals";
+import BaseScene from "./BaseScene";
 import GamepadDeviceManager from "../input/GamepadDeviceManager";
+import { Globals } from "../Globals";
 import SpriteFont from "../menus/SpriteFont";
 
-export default class TitleScreen extends Phaser.Scene {
+export default class TitleScreen extends BaseScene {
+    private static readonly BG_COLOR = '#000000';
+    private static readonly PROMPT_HAS_GAMEPADS = '# OF GAMEPADS FOUND: ';
+    private static readonly PROMPT_NO_GAMEPADS = 'CONNECT GAMEPADS FOR CO-OP PLAY';    
+    private static readonly PROMPT_TOUCH_SCREEN = "TOUCH SCREEN AGAIN TO PLAY";    
+    private static readonly TEXT_MARGIN_LEFT = 64;
+    private static readonly TEXT_MARGIN_TOP = 152;    
     bg: Phaser.GameObjects.Image;
     font: SpriteFont;
-    private static readonly TEXT_MARGIN_LEFT = 64;
-    private static readonly TEXT_MARGIN_TOP = 152;
-    private static readonly PROMPT_NO_GAMEPADS = 'CONNECT GAMEPADS FOR CO-OP PLAY';
-    private static readonly PROMPT_HAS_GAMEPADS = '# OF GAMEPADS FOUND: ';
-    private static readonly PROMPT_TOUCH_SCREEN = "TOUCH SCREEN AGAIN TO PLAY";
-    noPadGlyphs: Phaser.GameObjects.Sprite[];  
+    fullscreen: boolean;
     hasPadGlyphs: Phaser.GameObjects.Sprite[];  
     hasTouchGlyphs: Phaser.GameObjects.Sprite[];  
-    numPads: integer;
     kbPlugin: Phaser.Input.Keyboard.KeyboardPlugin;
-    padPlugin: Phaser.Input.Gamepad.GamepadPlugin;
-    fullscreen: boolean;
+    noPadGlyphs: Phaser.GameObjects.Sprite[];      
+    numPads: integer;    
+    padPlugin: Phaser.Input.Gamepad.GamepadPlugin;    
     touchConfirmed: integer;
     transitionInProgress: boolean;
 
@@ -38,11 +40,12 @@ export default class TitleScreen extends Phaser.Scene {
         console.log('[constructor@TitleScreen] OUT');
     }
 
-    create() {
+    create(ctx?: any) {
         console.log('[TitleScreen.create] IN');
+        super.create(ctx);
+        this.cameras.main.setBackgroundColor(TitleScreen.BG_COLOR);
         this.bg = this.add.image(0, 0, 'title_screen');
         this.bg.setOrigin(0, 0);
-        //this.bg.setInteractive();
         this.font = new SpriteFont(this);
         let y = this._buildCopyrightNotice(TitleScreen.TEXT_MARGIN_TOP);        
         this._buildPlayerPrompt(y + 8);
@@ -54,13 +57,16 @@ export default class TitleScreen extends Phaser.Scene {
             icon.setOrigin(0, 0);
         }
         
-        this.kbPlugin = this.input.keyboard.on('keydown', event => {
+        // TODO Move this logic to BaseScene.ts
+        /*this.kbPlugin = this.input.keyboard.on('keydown', event => {
             console.log("Pressed " + event.key);            
-            this._startGame();
+            //this._startGame();
+            this._openMenu();
         });        
         this.padPlugin = this.input.gamepad.on('down', event => {
             console.log("Pressed " + event.button + " on " + event.pad);            
-            this._startGame();
+            //this._startGame();
+            this._openMenu();
         });
         this.input.addPointer(1);
         this.input.on('pointerdown', pointer => {
@@ -79,9 +85,10 @@ export default class TitleScreen extends Phaser.Scene {
                 this.touchConfirmed = 1;
             } else {
                 this.touchConfirmed = 2;
-                this._startGame();
-            }            
-        });
+                //this._startGame();
+                this._openMenu();
+            }
+        });*/
         this.cameras.main.fadeIn(1000);
         console.log('[TitleScreen.create] OUT');
     }
@@ -96,15 +103,14 @@ export default class TitleScreen extends Phaser.Scene {
         this.fullscreen = !this.fullscreen;
     }
 
-    private _startGame() {
+    private _openMenu() {
         if (this.transitionInProgress) return;
         this.transitionInProgress = true;
         this.cameras.main.fadeOut(1000, 0, 0, 0, (_camera, _progress) => {
             if (_progress >= 1) {                
-                this.scene.start('Scene21Desert', {numPlayers: 1 + this.numPads, touch: (this.touchConfirmed == 2)});
+                this.scene.start('MenuScreen', {numPads: this.numPads, touch: (this.touchConfirmed == 2)});
             }
         });
-        
     }
     
     private _buildCopyrightNotice(offset_y: integer) {
@@ -149,9 +155,9 @@ export default class TitleScreen extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        super.update(time, delta);
-        let numPads = GamepadDeviceManager.getNumberOfDevices(this);        
-        if (numPads != this.numPads) {            
+        super.update(time, delta);        
+        let numPads = this.ctrlMethods.length - 1;
+        if (numPads != this.numPads) {
             this.numPads = numPads;
             if (numPads > 0) {
                 this.font.setVisible(this.hasTouchGlyphs, false);
@@ -164,6 +170,8 @@ export default class TitleScreen extends Phaser.Scene {
                 this.font.setVisible(this.noPadGlyphs, true);
             }
         }
-
+        if (this.anyInputHit('a') || this.anyInputHit('b')) {
+            this._openMenu();
+        }
     }
 }

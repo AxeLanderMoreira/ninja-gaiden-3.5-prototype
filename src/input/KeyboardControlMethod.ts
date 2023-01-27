@@ -11,13 +11,24 @@ export default class KeyboardControlMethod extends ControlMethod {
     aKey: Phaser.Input.Keyboard.Key;
     bKey: Phaser.Input.Keyboard.Key;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    private static s_instance: KeyboardControlMethod; // works as a singleton
     
-    constructor(scene: Phaser.Scene) {
+    private constructor(scene: Phaser.Scene) {
         super();
         this.resetScene(scene);
     };
 
+    static get(scene: Phaser.Scene) {
+        if (!this.s_instance) {
+            this.s_instance = new KeyboardControlMethod(scene);
+        } else {
+            this.s_instance.resetScene(scene);
+        }
+        return this.s_instance;
+    }
+
     hit(btn: string): boolean {
+        //console.log('[KeyboardControlMethod.hit] btn=' + btn + "; IN");        
         switch(btn) {
             case 'a': return Phaser.Input.Keyboard.JustDown(this.aKey);
             case 'b': return Phaser.Input.Keyboard.JustDown(this.bKey);
