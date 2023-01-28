@@ -24,8 +24,8 @@ export class Globals {
     /**
      * Physics
      */
-    //static readonly GRAVITY = 300;
     static readonly GRAVITY = 600;
+    static readonly TARGET_FPS = 60;
 
     /**
      * Debug options

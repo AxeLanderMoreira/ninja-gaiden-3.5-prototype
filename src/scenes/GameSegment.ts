@@ -12,14 +12,11 @@ import Entity from "../entities/Entity";
 import EntityFactory from "../entities/EntityFactory";
 import Explod from "../entities/Explod";
 import FpsHud from "../menus/FpsHud";
-import GamepadControlMethod from "../input/GamepadControlMethod";
-import KeyboardControlMethod from "../input/KeyboardControlMethod";
 import { Globals } from "../Globals";
 import Ninja from "../entities/Ninja";
 import PlayerHud from "../menus/PlayerHud";
 import PowerUp from "../entities/PowerUp";
 import TimeHud from "../menus/TimeHud";
-import VirtualPadControlMethod from "../input/VirtualPadControlMethod";
 
 /**
  * Contains all logic common to every Scene in this Game.
@@ -34,6 +31,9 @@ export default abstract class GameSegment extends BaseScene {
     static readonly PLAYER_SPAWN_H_SPACING = 32; /** Horizontal spacing between each Player's spawn area */
     static readonly PLAYER1_SPAWN_X = 64; /**< X-Position where to spawn Ninja Player 1 */
     static readonly PLAYER1_SPAWN_Y = -32;
+    // Camera maximum movement in all directions, in pixels, between frames
+    //static readonly CAM_MAX_MOVEMENT = Ninja.WALKING_SPEED / Globals.TARGET_FPS;
+    static readonly CAM_MAX_MOVEMENT = 2;
 
     assignedIndices: integer[];
     camFocusPoint: Phaser.GameObjects.GameObject;
@@ -151,17 +151,9 @@ export default abstract class GameSegment extends BaseScene {
         this.platformGroup = this.physics.add.staticGroup();
         this.powerUpGroup = this.physics.add.group();
 
-        if (this.numPlayers == 1) {
-          this.cameras.main.startFollow(this.players[0].sprite, true);  
-        } else {
-          this.camFocusPoint = this.add.rectangle(0, 0, 1, 1, 0x000000, 0);
-          this.cameras.main.startFollow(this.camFocusPoint, true);  
-        }
+        this.camFocusPoint = this.add.rectangle(0, 0, 1, 1, 0x000000, 0);
+        this.cameras.main.startFollow(this.camFocusPoint, true);  
 
-        //this.cameras.main.startFollow(this.players[0].sprite, true);  
-        this.cameras.main.startFollow(
-          this.numPlayers == 1 ? this.players[0].sprite: this.camFocusPoint, 
-          true);  
         this.playerHuds = [];
         this.players.forEach((p, i) => {
           this.playerHuds.push(new PlayerHud(this, p, i));
@@ -432,13 +424,36 @@ export default abstract class GameSegment extends BaseScene {
           player.update();
           if (player.getHp() > 0) {
             numAlive++;
-            avg_x += player.sprite.x;
-            avg_y += player.sprite.y;
+            avg_x += player.sprite.body.x;
+            avg_y += player.sprite.body.y;
           }          
         });
-        if (this.numPlayers > 1) {          
-          this.camFocusPoint.x = avg_x / numAlive;
-          this.camFocusPoint.y = avg_y / numAlive;
+        // Move camera focal point, and try do it smoothly - fixes abrupt
+        // camera movement when a player suddenly dies and the camera has
+        // to move away from its previous position
+        if (this.numPlayers > 0) {          
+          let prev_cam_x = this.camFocusPoint.x;
+          let prev_cam_y = this.camFocusPoint.y;
+          let new_cam_x = avg_x / numAlive;
+          let new_cam_y = avg_y / numAlive;
+          let offset_cam_x = new_cam_x - prev_cam_x;
+          let offset_cam_y = new_cam_y - prev_cam_y;
+          // Basically, if the cam moves away faster than it normally would,
+          // we just move a bit towards what would be the destination point (by 
+          // a fixed movement rate)
+          let cam_max_move = GameSegment.CAM_MAX_MOVEMENT;
+          if (offset_cam_x < -cam_max_move) {
+            new_cam_x = prev_cam_x - cam_max_move;
+          } else if (offset_cam_x > cam_max_move) {
+            new_cam_x = prev_cam_x + cam_max_move;
+          }
+          if (offset_cam_y < -cam_max_move) {
+            new_cam_y = prev_cam_y - cam_max_move;
+          } else if (offset_cam_y > cam_max_move) {
+            new_cam_y = prev_cam_y + cam_max_move;
+          }
+          this.camFocusPoint.x = new_cam_x;
+          this.camFocusPoint.y = new_cam_y;
         }
         this._spawnEnemies();
         this.enemies.forEach((enemy) => {

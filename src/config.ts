@@ -24,7 +24,8 @@ export default {
     default: 'arcade',
     arcade: {
       gravity: { y : Globals.GRAVITY},
-      debug: false
+      debug: false,
+      fps: Globals.TARGET_FPS
     }
   },
   render: {
