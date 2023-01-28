@@ -7,7 +7,6 @@ import GameSegment from "../scenes/GameSegment";
 import Enemy from "./Enemy";
 
 export default class DroidBall extends Enemy {
-    //proximity: Phaser.GameObjects.Rectangle;
     static rect1: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
     static rect2: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
 
@@ -28,6 +27,13 @@ export default class DroidBall extends Enemy {
     static initAnims (scene: GameSegment) {        
         scene.createAnim('droid_ball', 0, 'wait', {frames: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]}, 2000, -1);
         scene.createAnim('droid_ball', 0, 'bounce', {start: 2, end: 5}, 400, -1);        
+    }
+
+    static preloadResources (scene: GameSegment) {
+        scene.load.spritesheet('droid_ball', 'assets/DroidBall.png', {
+            frameWidth: 16,
+            frameHeight: 16
+        })
     }
   
     constructor(scene: GameSegment, sprite: Phaser.Physics.Arcade.Sprite, variant?: integer) {
@@ -69,16 +75,14 @@ export default class DroidBall extends Enemy {
                 DroidBall.rect1.width += 32;
                 DroidBall.rect1.y -= 32;
                 DroidBall.rect1.height += 32;                
-                // Second rectangle is the Ninja body        
-                // TODO Test with multiple players
+                // Second rectangle is the Ninja body
                 this.scene.players.forEach(player => {
                     Phaser.Display.Bounds.GetBounds(player.sprite, DroidBall.rect2);               
                     if (Phaser.Geom.Intersects.RectangleToRectangle(DroidBall.rect1, DroidBall.rect2)) {
                         this.player = player.sprite; // This DroidBall will follow this Player forever
                         this.setState("bounce");
                     }
-                }); 
-                
+                });                
                 // Credits to samme for detailing a way to check collision between two rectangles 
                 // outside of Phaser.Physics
                 // Link for reference:

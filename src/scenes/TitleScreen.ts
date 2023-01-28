@@ -7,24 +7,23 @@ import BaseScene from "./BaseScene";
 import GamepadDeviceManager from "../input/GamepadDeviceManager";
 import { Globals } from "../Globals";
 import SpriteFont from "../menus/SpriteFont";
+import KeyboardControlMethod from "../input/KeyboardControlMethod";
 
 export default class TitleScreen extends BaseScene {
     private static readonly BG_COLOR = '#000000';
     private static readonly PROMPT_HAS_GAMEPADS = '# OF GAMEPADS FOUND: ';
     private static readonly PROMPT_NO_GAMEPADS = 'CONNECT GAMEPADS FOR CO-OP PLAY';    
-    private static readonly PROMPT_TOUCH_SCREEN = "TOUCH SCREEN AGAIN TO PLAY";    
+    private static readonly PROMPT_TOUCH_SCREEN = "TOUCH A OR B TO PLAY";    
     private static readonly TEXT_MARGIN_LEFT = 64;
     private static readonly TEXT_MARGIN_TOP = 152;    
     bg: Phaser.GameObjects.Image;
     font: SpriteFont;
     fullscreen: boolean;
     hasPadGlyphs: Phaser.GameObjects.Sprite[];  
-    hasTouchGlyphs: Phaser.GameObjects.Sprite[];  
     kbPlugin: Phaser.Input.Keyboard.KeyboardPlugin;
     noPadGlyphs: Phaser.GameObjects.Sprite[];      
     numPads: integer;    
     padPlugin: Phaser.Input.Gamepad.GamepadPlugin;    
-    touchConfirmed: integer;
     transitionInProgress: boolean;
 
     constructor() {
@@ -32,10 +31,8 @@ export default class TitleScreen extends BaseScene {
         super('TitleScreen'); 
         this.noPadGlyphs = [];
         this.hasPadGlyphs = [];
-        this.hasTouchGlyphs = [];
         this.numPads = 0;
         this.fullscreen = false;
-        this.touchConfirmed = 0;
         this.transitionInProgress = false;
         console.log('[constructor@TitleScreen] OUT');
     }
@@ -88,7 +85,7 @@ export default class TitleScreen extends BaseScene {
         this.transitionInProgress = true;
         this.cameras.main.fadeOut(1000, 0, 0, 0, (_camera, _progress) => {
             if (_progress >= 1) {                
-                this.scene.start('MenuScreen', {numPads: this.numPads, touch: (this.touchConfirmed == 2)});
+                this.scene.start('MenuScreen', {numPads: this.numPads});
             }
         });
     }
@@ -106,14 +103,21 @@ export default class TitleScreen extends BaseScene {
     private _buildPlayerPrompt(offset_y: integer) {
         let _x = Globals.SCREEN_WIDTH / 2 ;//TitleScreen.TEXT_MARGIN_LEFT;
         let _y = offset_y;
-        this.font.putGlyphs('PRESS ANY KEY TO START', _x, _y, SpriteFont.H_ALIGN_CENTER); _y += SpriteFont.CHAR_HEIGHT + 2;
+        if (this.hasTouchScreen()) {
+            this.font.putGlyphs('TOUCH A OR B TO START', _x, _y, SpriteFont.H_ALIGN_CENTER);
+        } else {
+            this.font.putGlyphs('PRESS ' + KeyboardControlMethod.DEFAULT_MAPPED_A_BUTTON + 
+                                ' OR ' + KeyboardControlMethod.DEFAULT_MAPPED_B_BUTTON + 
+                                ' TO START', 
+                                _x, _y, 
+                                SpriteFont.H_ALIGN_CENTER); 
+        }        
+        _y += SpriteFont.CHAR_HEIGHT + 2;
         this.numPads = GamepadDeviceManager.getNumberOfDevices(this);
 
         this.noPadGlyphs = this.font.putGlyphs(TitleScreen.PROMPT_NO_GAMEPADS, _x, _y, SpriteFont.H_ALIGN_CENTER);
         this.hasPadGlyphs = this.font.putGlyphs(TitleScreen.PROMPT_HAS_GAMEPADS + this.numPads.toString(), _x, _y, SpriteFont.H_ALIGN_CENTER);
-        this.hasTouchGlyphs = this.font.putGlyphs(TitleScreen.PROMPT_TOUCH_SCREEN, _x, _y, SpriteFont.H_ALIGN_CENTER);
 
-        this.font.setVisible(this.hasTouchGlyphs, false);
         if (this.numPads > 0) {
             this.font.setVisible(this.noPadGlyphs, false);
         } else {
@@ -141,12 +145,10 @@ export default class TitleScreen extends BaseScene {
         if (numPads != this.numPads) {
             this.numPads = numPads;
             if (numPads > 0) {
-                this.font.setVisible(this.hasTouchGlyphs, false);
                 this.font.changeGlyph(this.hasPadGlyphs[this.hasPadGlyphs.length - 1], this.numPads.toString());
                 this.font.setVisible(this.hasPadGlyphs, true);
                 this.font.setVisible(this.noPadGlyphs, false);
             } else {
-                this.font.setVisible(this.hasTouchGlyphs, false);
                 this.font.setVisible(this.hasPadGlyphs, false);
                 this.font.setVisible(this.noPadGlyphs, true);
             }

@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import { Globals } from "../Globals";
+import ChopperClaw from "../scenes/ChopperClaw";
 import GameSegment from "../scenes/GameSegment";
 import DroidBall from "./DroidBall";
 import EnemyAlien from "./EnemyAlien";
@@ -22,6 +23,22 @@ export default class EntityFactory {
     /*************************************************************************\
      * SPECIFIC FACTORY METHODS FOR EACH ENTITY
     \*************************************************************************/
+    private static createChopperClaw(obj: any): Entity {
+        let sprite = EntityFactory.scene.enemyGroup.create(0, 0, 'chopper_claw');
+        sprite.setDepth(Globals.ENEMY_DEPTH);
+        let ret: ChopperClaw = new ChopperClaw(EntityFactory.scene, sprite);
+        if (obj.properties) {
+            obj.properties.forEach((prop) => {
+              if (prop.name == "stopY") {
+                ret.stopY = prop.value;
+              }
+            })
+          }
+        sprite.setData('type', 'ChopperClaw');
+        sprite.setData('parent', ret);
+        return ret;
+    }
+
     private static createDroidBall(obj: any): Entity {
         let sprite = EntityFactory.scene.enemyGroup.create(0, 0, 'droid_ball');
         sprite.setDepth(Globals.ENEMY_DEPTH);
@@ -66,6 +83,7 @@ export default class EntityFactory {
         let ret: Entity;
         console.log('[makeOne@EntityFactory] obj.name = ' + obj.name);
         switch(obj.name) {
+            case 'ChopperClaw': ret = EntityFactory.createChopperClaw(obj); break;
             case 'DroidBall': ret = EntityFactory.createDroidBall(obj); break;
             case 'EnemyAlien': ret = EntityFactory.createEnemyAlien(obj); break;
             case 'EnemySoldier': ret = EntityFactory.createEnemySoldier(obj); break;

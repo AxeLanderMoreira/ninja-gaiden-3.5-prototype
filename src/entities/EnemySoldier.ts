@@ -14,6 +14,13 @@ export default class EnemySoldier extends Enemy {
         scene.createAnim('enemy_soldier', 0, 'walk', {start: 0, end: 1}, 600, -1);
     }
 
+    static preloadResources (scene: GameSegment) {
+        scene.load.spritesheet('enemy_soldier', 'assets/EnemySoldier.png', {
+            frameWidth: 24,
+            frameHeight: 31
+        });
+    }
+
     constructor(scene: GameSegment, sprite: Phaser.Physics.Arcade.Sprite, variant?: integer) {
         super(scene, sprite, variant);
         this.setCustomHitbox(new Phaser.Geom.Rectangle(0, 0, 16,30));

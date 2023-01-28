@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="240" height="14" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="47">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="240" height="14" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="49">
  <editorsettings>
   <export target="Tilemap2-1.json" format="json"/>
  </editorsettings>
@@ -75,6 +75,17 @@
   </object>
   <object id="32" name="DroidBall" gid="35" x="3241.67" y="114.667" width="32" height="32"/>
   <object id="33" name="DroidBall" gid="35" x="3363.67" y="114.667" width="32" height="32"/>
+  <object id="47" name="ChopperClaw" gid="36" x="1716.67" y="1" width="32" height="32">
+   <properties>
+    <property name="spawnOffsetX" type="int" value="192"/>
+    <property name="stopY" type="int" value="96"/>
+   </properties>
+  </object>
+  <object id="48" name="ChopperClaw" gid="36" x="1844.67" y="1" width="32" height="32">
+   <properties>
+    <property name="stopY" type="int" value="96"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="3" name="Walls">
   <object id="10" name="Wall" x="528" y="32" width="16" height="112"/>

@@ -31,17 +31,67 @@ export default class Ninja extends Entity {
         jump_slash: {x:1,y:6},
         stand_slash: {x:4,y:10}
     }
+    ctrlMethod: ControlMethod;
+    currentPower: integer;
+    invincible: boolean;
     jumping: boolean = false;
-    wall?: Phaser.GameObjects.GameObject; /**< the wall the ninja is currently sticked to/climbing */
-    powerUp: boolean; // sword is powered up    
-    timedEvent?: Phaser.Time.TimerEvent;
+    lives: integer;
     mana: integer;
     maxMana: integer;
-    lives: integer;
+    powerUp: boolean; // sword is powered up   
     quicksand: boolean;
-    ctrlMethod: ControlMethod;
-    invincible: boolean;
-    currentPower: integer;
+    timedEvent?: Phaser.Time.TimerEvent; 
+    wall?: Phaser.GameObjects.GameObject; /**< the wall the ninja is currently sticked to/climbing */
+
+    /**
+     * 
+     * @param scene 
+     */
+    static initAnims (scene: GameSegment) {
+        for (let i = 0; i < Ninja.MAX_NUM_PLAYERS; i++) {
+            let key = 'ninja' + i.toString();
+            scene.createAnim(key, 0, 'climb_idle', {frames: [30]}, 200, -1);
+            scene.createAnim(key, 0, 'climb_move', {start: 30, end: 31}, 200, -1);
+            scene.createAnim(key, 0, 'crouch_idle', {start: 20, end: 21}, 200, -1);
+            scene.createAnim(key, 0, 'crouch_slash', {start: 22, end: 24}, Ninja.SLASH_SPEED, 0);
+            scene.createAnim(key, 0, 'get_hit', {frames: [9]}, 200, -1);
+            scene.createAnim(key, 0, 'jump_descend', {start: 14, end: 15}, 200, -1);
+            scene.createAnim(key, 0, 'jump_reach', {frames: [25]}, 200, -1);
+            scene.createAnim(key, 0, 'jump_slash', {start: 16, end: 18}, Ninja.SLASH_SPEED, 0);
+            scene.createAnim(key, 0, 'jump_sommersault', {start: 10, end: 13}, 400, -1);
+            scene.createAnim(key, 0, 'run', {frames: [6, 7, 8, 7]}, 300, -1);
+            scene.createAnim(key, 0, 'stand_idle', {start: 0, end: 1}, 200, -1);
+            scene.createAnim(key, 0, 'stand_slash', {start: 2, end: 4}, Ninja.SLASH_SPEED, 0);
+        }        
+        scene.createAnim('sword', 0, 'slash', {frames: [0, 1, 2]}, Ninja.SLASH_SPEED, 0);
+        scene.createAnim('sword', 0, 'pslash', {frames: [0, 3, 4]}, Ninja.SLASH_SPEED, 0);
+    }
+
+    /**
+     * Preload textures (and later sound samples?)
+     */
+    static preloadResources (scene: GameSegment) {
+        scene.load.spritesheet('ninja0', 'assets/Ninja.png', {
+            frameWidth: 36,
+            frameHeight: 37
+        });
+        scene.load.spritesheet('ninja1', 'assets/Player2.png', {
+            frameWidth: 36,
+            frameHeight: 37
+        });
+        scene.load.spritesheet('ninja2', 'assets/Player3.png', {
+            frameWidth: 36,
+            frameHeight: 37
+        });
+        scene.load.spritesheet('ninja3', 'assets/Player4.png', {
+            frameWidth: 36,
+            frameHeight: 37
+        });
+        scene.load.spritesheet('sword', 'assets/Sword.png', {
+            frameWidth: 35,
+            frameHeight: 18
+        });
+    }
 
     constructor(scene: GameSegment, ctrlMethod: ControlMethod, sprite: Phaser.Physics.Arcade.Sprite, sword: Phaser.Physics.Arcade.Sprite) {
         super(scene, sprite);        
@@ -85,32 +135,7 @@ export default class Ninja extends Entity {
     getMaxMana(): integer {
         return this.maxMana;
     }
-
-    /**
-     * 
-     * @param scene 
-     */
-    static initAnims (scene: GameSegment) {
-        for (let i = 0; i < Ninja.MAX_NUM_PLAYERS; i++) {
-            let key = 'ninja' + i.toString();
-            console.log('[Ninja.initAnims] creating animations for key ninja' + i.toString());
-            scene.createAnim(key, 0, 'climb_idle', {frames: [30]}, 200, -1);
-            scene.createAnim(key, 0, 'climb_move', {start: 30, end: 31}, 200, -1);
-            scene.createAnim(key, 0, 'crouch_idle', {start: 20, end: 21}, 200, -1);
-            scene.createAnim(key, 0, 'crouch_slash', {start: 22, end: 24}, Ninja.SLASH_SPEED, 0);
-            scene.createAnim(key, 0, 'get_hit', {frames: [9]}, 200, -1);
-            scene.createAnim(key, 0, 'jump_descend', {start: 14, end: 15}, 200, -1);
-            scene.createAnim(key, 0, 'jump_reach', {frames: [25]}, 200, -1);
-            scene.createAnim(key, 0, 'jump_slash', {start: 16, end: 18}, Ninja.SLASH_SPEED, 0);
-            scene.createAnim(key, 0, 'jump_sommersault', {start: 10, end: 13}, 400, -1);
-            scene.createAnim(key, 0, 'run', {frames: [6, 7, 8, 7]}, 300, -1);
-            scene.createAnim(key, 0, 'stand_idle', {start: 0, end: 1}, 200, -1);
-            scene.createAnim(key, 0, 'stand_slash', {start: 2, end: 4}, Ninja.SLASH_SPEED, 0);
-        }        
-        scene.createAnim('sword', 0, 'slash', {frames: [0, 1, 2]}, Ninja.SLASH_SPEED, 0);
-        scene.createAnim('sword', 0, 'pslash', {frames: [0, 3, 4]}, Ninja.SLASH_SPEED, 0);
-    }
-
+    
     onBeginState(state: string) {
         console.log("beginning state " + state );     
         const ninjaBody : Phaser.Physics.Arcade.Body = this.sprite.body;   

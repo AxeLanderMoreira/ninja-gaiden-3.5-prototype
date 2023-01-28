@@ -17,6 +17,8 @@ import Ninja from "../entities/Ninja";
 import PlayerHud from "../menus/PlayerHud";
 import PowerUp from "../entities/PowerUp";
 import TimeHud from "../menus/TimeHud";
+import ChopperClaw from "./ChopperClaw";
+import Enemy from "../entities/Enemy";
 
 /**
  * Contains all logic common to every Scene in this Game.
@@ -39,7 +41,7 @@ export default abstract class GameSegment extends BaseScene {
     camFocusPoint: Phaser.GameObjects.GameObject;
     ctrlMethods: ControlMethod[];
     currTimerValue: number;     // countdown, also in milliseconds
-    enemies: Entity[];  // for general logic and state machine
+    enemies: Enemy[];  // for general logic and state machine
     enemyGroup: Phaser.Physics.Arcade.Group;   // for physics and collision handling
     enemyNinjaCollider: Phaser.Physics.Arcade.Collider;
     fpsHud: FpsHud;
@@ -60,7 +62,6 @@ export default abstract class GameSegment extends BaseScene {
     stopping: boolean;
     t0: number;
     timeHud: TimeHud;
-    touch: boolean;
     
     constructor(config:string) {
         super(config);
@@ -68,7 +69,6 @@ export default abstract class GameSegment extends BaseScene {
         this.powerUps = [];
         this.prevScrollX = this.prevScrollY = -1; // uninitialized
         this.stopping = false;
-        this.touch = false;
     }
 
     /**
@@ -108,13 +108,13 @@ export default abstract class GameSegment extends BaseScene {
         super.create(ctx);
         this.numPlayers = ctx ? ctx.numPlayers : 1;
         this.assignedIndices = ctx.assignedIndices;
-        this.touch = ctx.touch; // touch screen, means we need to provide virtual d-pad and buttons
         const sprites = this._createNinjaSprites();
         const swords = this._createSwordSprites();        
 
         /*************************************************************************\
          * ENEMY ANIMS
         \*************************************************************************/
+        ChopperClaw.initAnims(this);
         EnemyAlien.initAnims(this);
         EnemySoldier.initAnims(this);
         DroidBall.initAnims(this);
@@ -307,7 +307,7 @@ export default abstract class GameSegment extends BaseScene {
         this.stop();
         this.cameras.main.fadeOut(500, 0, 0, 0, (_camera, _progress) => {
         if (_progress >= 1) {
-          this.scene.restart({numPlayers: this.numPlayers, touch: this.touch});
+          this.scene.restart({numPlayers: this.numPlayers});
         }
       });
     }
@@ -321,48 +321,15 @@ export default abstract class GameSegment extends BaseScene {
     }
 
     preload() {
-        super.preload();        
-        this.load.spritesheet('droid_ball', 'assets/DroidBall.png', {
-          frameWidth: 16,
-          frameHeight: 16
-        })
-        this.load.spritesheet('enemy_alien', 'assets/EnemyAlien.png', {
-          frameWidth: 22,
-          frameHeight: 32
-        });
-        this.load.spritesheet('enemy_soldier', 'assets/EnemySoldier.png', {
-          frameWidth: 24,
-          frameHeight: 31
-        });
-        this.load.spritesheet('explod', 'assets/Explod.png', {
-          frameWidth: 15,
-          frameHeight: 16
-        });        
-        this.load.spritesheet('ninja0', 'assets/Ninja.png', {
-          frameWidth: 36,
-          frameHeight: 37
-        });
-        this.load.spritesheet('ninja1', 'assets/Player2.png', {
-          frameWidth: 36,
-          frameHeight: 37
-        });
-        this.load.spritesheet('ninja2', 'assets/Player3.png', {
-          frameWidth: 36,
-          frameHeight: 37
-        });
-        this.load.spritesheet('ninja3', 'assets/Player4.png', {
-          frameWidth: 36,
-          frameHeight: 37
-        });
-        this.load.spritesheet('power_up', 'assets/PowerUp.png', {
-          frameWidth: 16,
-          frameHeight: 16
-        });    
-        this.load.spritesheet('sword', 'assets/Sword.png', {
-          frameWidth: 35,
-          frameHeight: 18
-        });    
-        
+        super.preload();   
+        // Move these calls and .initAnim() calls to EntityFactory?
+        ChopperClaw.preloadResources(this);
+        DroidBall.preloadResources(this);
+        EnemyAlien.preloadResources(this);
+        EnemySoldier.preloadResources(this);
+        Explod.preloadResources(this);
+        Ninja.preloadResources(this);
+        PowerUp.preloadResources(this);
       }
 
     /**
@@ -409,7 +376,11 @@ export default abstract class GameSegment extends BaseScene {
           method.update();
         });        
         let cam = this.cameras.main;
-        this.physics.collide(this.enemyGroup, this.getMapPlatformLayer());
+        this.enemies.forEach(enemy => {
+          if (!enemy.hovering) {
+            this.physics.collide(enemy.sprite, this.getMapPlatformLayer());
+          }
+        });
         this.physics.collide(this.powerUpGroup, this.getMapPlatformLayer());
 
         /* Update the status of each player, and calculate the median point where to

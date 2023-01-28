@@ -16,6 +16,13 @@ export default class EnemyAlien extends Enemy {
       scene.createAnim('enemy_alien', 1, 'run', {start: 2, end: 3}, 200, -1);
     }
 
+    static preloadResources (scene: GameSegment) {
+        scene.load.spritesheet('enemy_alien', 'assets/EnemyAlien.png', {
+            frameWidth: 22,
+            frameHeight: 32
+        });
+    }
+
     readonly WALKING_SPEED = 80;
     readonly DEBUG_PLACEMENT = false;
     static readonly JUMP_SPEED = -300; // Initial jump velocity Y

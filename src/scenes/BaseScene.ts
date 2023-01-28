@@ -103,7 +103,6 @@ export default abstract class BaseScene extends Phaser.Scene {
         if (numPads != (ctrls.length + 1)) {
             // keep keyboard/virtualpad at the end of array; gamepads have priority
             let lastOptionCtrl: ControlMethod = ctrls[ctrls.length - 1];
-            console.log("lastOptionCtrl = " + lastOptionCtrl.constructor.name);
             ctrls.splice(0); //clear array
             for (let i = 0; i < numPads; i++) {
                 ctrls.push(GamepadControlMethod.get(this, i));
@@ -113,7 +112,6 @@ export default abstract class BaseScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        // TODO Handle touch and Virtualpad here?
         this.refreshControlMethods();
         this.ctrlMethods.forEach(ctrl => {
             ctrl.update();

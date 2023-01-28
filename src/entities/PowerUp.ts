@@ -24,6 +24,13 @@ export default class PowerUp extends Entity {
             scene.createAnim('power_up', i, 'fall', {frames: [i]}, 200, -1);
         }      
     }
+
+    static preloadResources(scene: GameSegment) {
+        scene.load.spritesheet('power_up', 'assets/PowerUp.png', {
+            frameWidth: 16,
+            frameHeight: 16
+        });
+    }
     
     constructor(scene: GameSegment, sprite: Phaser.Physics.Arcade.Sprite, variant?: integer) {
         super(scene, sprite, variant);

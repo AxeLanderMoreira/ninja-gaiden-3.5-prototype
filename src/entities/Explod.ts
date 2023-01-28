@@ -22,6 +22,13 @@ export default class Explod {
         scene.createAnim('explod', 0, 'shockwave', {frames: [1]}, 200, 0);
     }
 
+    static preloadResources (scene: GameSegment) {
+        scene.load.spritesheet('explod', 'assets/Explod.png', {
+            frameWidth: 15,
+            frameHeight: 16
+        });        
+    }
+
     /**
      * Construct an Explod effect from an Entity that has just been defeated. 
      * 

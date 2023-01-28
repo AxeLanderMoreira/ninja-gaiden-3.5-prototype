@@ -266,6 +266,47 @@
                  "width":32,
                  "x":3363.67,
                  "y":114.667
+                }, 
+                {
+                 "class":"",
+                 "gid":36,
+                 "height":32,
+                 "id":47,
+                 "name":"ChopperClaw",
+                 "properties":[
+                        {
+                         "name":"spawnOffsetX",
+                         "type":"int",
+                         "value":192
+                        }, 
+                        {
+                         "name":"stopY",
+                         "type":"int",
+                         "value":96
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":32,
+                 "x":1716.66666666667,
+                 "y":1
+                }, 
+                {
+                 "class":"",
+                 "gid":36,
+                 "height":32,
+                 "id":48,
+                 "name":"ChopperClaw",
+                 "properties":[
+                        {
+                         "name":"stopY",
+                         "type":"int",
+                         "value":96
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":32,
+                 "x":1844.66666666667,
+                 "y":1
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -541,8 +582,8 @@
                  "rotation":0,
                  "visible":true,
                  "width":16,
-                 "x":735.454545454545,
-                 "y":65.4545454545455
+                 "x":735.455,
+                 "y":65.4545
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -551,7 +592,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":47,
+ "nextobjectid":49,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
