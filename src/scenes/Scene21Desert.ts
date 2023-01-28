@@ -143,7 +143,6 @@ export default class Scene21Desert extends GameSegment {
     }
 
     preload() {
-        console.log('[Scene21Desert.preload] BEGIN');
         super.preload();
         this.load.image('clouds', 'assets/tiles/ng3/2-1/clouds.png');
         this.load.image('mountains', 'assets/tiles/ng3/2-1/mountains.png');
@@ -152,7 +151,6 @@ export default class Scene21Desert extends GameSegment {
         this.load.image('quicksand', 'assets/tiles/ng3/2-1/Quicksand.png')
         this.load.image('tiles', 'assets/tiles/ng3/2-1/Tileset2-1.png');
         this.load.tilemapTiledJSON('map', 'assets/tiles/ng3/2-1/Tilemap2-1.json');        
-        console.log('[Scene21Desert.preload] END');
     }
 
     stop() {

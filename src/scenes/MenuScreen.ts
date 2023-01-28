@@ -142,7 +142,11 @@ export default class MenuScreen extends BaseScene {
             _x += 10;
             // Control method            
             spr = this.add.sprite(_x, _y, 'control_methods');
-            spr.setFrame(this.assignedIndices[i]);                
+            if (i < this.ctrlMethods.length) {
+                spr.setFrame(this._getControlMethodIcon(this.ctrlMethods[this.assignedIndices[i]]));
+            } else {
+                spr.setFrame(0);
+            }
             spr.setOrigin(0, 0);
             spr.setVisible(false);
             this.ctrlIcons.push(spr);
@@ -206,9 +210,14 @@ export default class MenuScreen extends BaseScene {
     private _nextPage() {
         switch(this.page) {
             case MenuScreen.PAGE_SELECT_NUM_PLAYERS:
-                this.containers[this.page].setVisible(false);
-                this.page = MenuScreen.PAGE_ASSIGN_CONTROLS;
-                this.containers[this.page].setVisible(true);
+                if (this.ctrlMethods.length == 1 && this.numPlayersSelected == 1) {
+                    // 1 player and 1 input device? just skip next menu and go straight to the game
+                    this._startGame();
+                } else {
+                    this.containers[this.page].setVisible(false);
+                    this.page = MenuScreen.PAGE_ASSIGN_CONTROLS;
+                    this.containers[this.page].setVisible(true);
+                }
                 break;
             case MenuScreen.PAGE_ASSIGN_CONTROLS:
                 this._startGame();
@@ -225,9 +234,8 @@ export default class MenuScreen extends BaseScene {
             return; // nothing changed
         }
         this.assignedIndices = []; // something changed - reset
-        this.ctrlMethods.forEach(ctrl => {
-            let index: integer = this._getControlMethodIcon(ctrl);
-            this.assignedIndices.push(index);
+        this.ctrlMethods.forEach((ctrl, i) => {
+            this.assignedIndices.push(i);
         });        
     }
 
@@ -279,10 +287,8 @@ export default class MenuScreen extends BaseScene {
         let _y = MenuScreen.PAGE_1_TOP + 4 + (this.optionIndex * 20);
         this.leftArrowPage1.y = _y;
         this.rightArrowPage1.y = _y;
-        console.log('[MenuScreen._updateAssignControls] traverse array - total = ' + total);
         for (let i = 0; i < total; i ++) {
-            console.log('[MenuScreen._updateAssignControls] redrawing ctrl icons');
-            this.ctrlIcons[i].setFrame(this.assignedIndices[i]);
+            this.ctrlIcons[i].setFrame(this._getControlMethodIcon(this.ctrlMethods[this.assignedIndices[i]]));
         }
     }
 

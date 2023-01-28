@@ -40,6 +40,23 @@ export default class TitleScreen extends BaseScene {
         console.log('[constructor@TitleScreen] OUT');
     }
 
+    _createFullScreenIcon() {
+        let icon;
+        if (document.fullscreenEnabled) {
+            icon = this.add.sprite(Globals.SCREEN_WIDTH - 40, 8, 'full_screen_icon');
+            icon.setOrigin(0, 0);
+        }
+        this.input.on('pointerdown', pointer => {
+            if (icon) {
+                if (pointer.x >= icon.x && pointer.x < icon.x + icon.width &&
+                    pointer.y >= icon.y && pointer.y < icon.y + icon.height) {
+                    this._toggleFullScreen();
+                    return;
+                }
+            }
+        });
+    }
+
     create(ctx?: any) {
         console.log('[TitleScreen.create] IN');
         super.create(ctx);
@@ -49,46 +66,9 @@ export default class TitleScreen extends BaseScene {
         this.font = new SpriteFont(this);
         let y = this._buildCopyrightNotice(TitleScreen.TEXT_MARGIN_TOP);        
         this._buildPlayerPrompt(y + 8);
-        
-        // full screen icon
-        let icon;
-        if (document.fullscreenEnabled) {
-            icon = this.add.sprite(Globals.SCREEN_WIDTH - 40, 8, 'full_screen_icon');
-            icon.setOrigin(0, 0);
-        }
-        
-        // TODO Move this logic to BaseScene.ts
-        /*this.kbPlugin = this.input.keyboard.on('keydown', event => {
-            console.log("Pressed " + event.key);            
-            //this._startGame();
-            this._openMenu();
-        });        
-        this.padPlugin = this.input.gamepad.on('down', event => {
-            console.log("Pressed " + event.button + " on " + event.pad);            
-            //this._startGame();
-            this._openMenu();
-        });
-        this.input.addPointer(1);
-        this.input.on('pointerdown', pointer => {
-            console.log("Touched at point " + pointer.x + "," + pointer.y); 
-            if (icon) {
-                if (pointer.x >= icon.x && pointer.x < icon.x + icon.width &&
-                    pointer.y >= icon.y && pointer.y < icon.y + icon.height) {
-                    this._toggleFullScreen();
-                    return;
-                }
-            }
-            if (this.touchConfirmed == 0) {
-                this.font.setVisible(this.hasPadGlyphs, false);
-                this.font.setVisible(this.noPadGlyphs, false);
-                this.font.setVisible(this.hasTouchGlyphs, true);
-                this.touchConfirmed = 1;
-            } else {
-                this.touchConfirmed = 2;
-                //this._startGame();
-                this._openMenu();
-            }
-        });*/
+        if (this.hasTouchScreen()) {
+            this._createFullScreenIcon();
+        }        
         this.cameras.main.fadeIn(1000);
         console.log('[TitleScreen.create] OUT');
     }
@@ -146,6 +126,7 @@ export default class TitleScreen extends BaseScene {
     }
 
     preload() {
+        super.preload();
         this.load.spritesheet('hudfont', 'assets/HudFont.png', {
             frameWidth: 8,
             frameHeight: 8

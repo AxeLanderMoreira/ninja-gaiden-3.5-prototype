@@ -53,6 +53,8 @@ export default class VirtualPadControlMethod extends ControlMethod {
         this.hitAreaLeft = new Phaser.Geom.Triangle(0, 0, 40, 40, 0, 80);
         this.hitAreaRight = new Phaser.Geom.Triangle(80, 0, 40, 40, 80, 80);
 
+        scene.input.addPointer(1);
+
         this.resetScene(scene);
         
         console.log('[VirtualPadControlMethod] constructor - OUT');

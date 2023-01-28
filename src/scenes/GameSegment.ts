@@ -133,23 +133,12 @@ export default abstract class GameSegment extends BaseScene {
         let ctrl: ControlMethod;
         if (!this.players) {
           this.players = [];
-          console.log("[GameSegment.create] this.ctrlMethods.length = " + this.ctrlMethods.length);
-          console.log("[GameSegment.create] this.numPlayers = " + this.numPlayers);
-          /*this.ctrlMethods = [];*/
           for (let i = 0; i < this.numPlayers; i++) {
-            /*if (i == 0) {
-              ctrl = this.touch ? VirtualPadControlMethod.get(this) : KeyboardControlMethod.get(this);
-            } else {
-              ctrl = GamepadControlMethod.get(this, i - 1);
-            }
-            this.ctrlMethods.push(ctrl);*/
-            //let ctrl = this.ctrlMethods[i];
             let ctrl = this.ctrlMethods[this.assignedIndices[i]];
             this.players.push(new Ninja(this, ctrl, sprites[i], swords[i]));
           }
         } else {
           this.players.forEach((player, i) => {
-            //this.ctrlMethods[i].resetScene(this);
             player.respawn(sprites[i], swords[i]);
           })
         }
@@ -340,8 +329,7 @@ export default abstract class GameSegment extends BaseScene {
     }
 
     preload() {
-        this.load.image('virtual_buttons', 'assets/VirtualButtons.png');
-        this.load.image('virtual_dpad', 'assets/VirtualDPad.png');
+        super.preload();        
         this.load.spritesheet('droid_ball', 'assets/DroidBall.png', {
           frameWidth: 16,
           frameHeight: 16

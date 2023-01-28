@@ -7,6 +7,7 @@ import ControlMethod from "../input/ControlMethod";
 import GamepadControlMethod from "../input/GamepadControlMethod";
 import GamepadDeviceManager from "../input/GamepadDeviceManager";
 import KeyboardControlMethod from "../input/KeyboardControlMethod";
+import VirtualPadControlMethod from "../input/VirtualPadControlMethod";
 
 /**
  * This is the actual base class for any class deriving from Scene, in the
@@ -59,6 +60,9 @@ export default abstract class BaseScene extends Phaser.Scene {
         return false;
     }
 
+    protected hasTouchScreen(): boolean  { return ('ontouchstart' in document.documentElement); }
+
+
     /**
      * Called upon the Scene creation, should recheck and reconfigure
      * the inputs.
@@ -69,13 +73,24 @@ export default abstract class BaseScene extends Phaser.Scene {
             this.ctrlMethods = ctx.ctrlMethods; // carry over from previous screen
         } else {
             this.ctrlMethods = [];
-            this.ctrlMethods.push(KeyboardControlMethod.get(this));            
+            if (!this.hasTouchScreen()) {
+                this.ctrlMethods.push(KeyboardControlMethod.get(this));
+            } else {
+                this.ctrlMethods.push(VirtualPadControlMethod.get(this));
+            }            
         }
         this.refreshControlMethods();
         this.ctrlMethods.forEach(ctrl => {
             console.log('[BaseScene.create] ctrl.resetScene() for ' + this.constructor.name)
             ctrl.resetScene(this);
         });
+    }
+
+    preload() {
+        if (this.hasTouchScreen()) {
+            this.load.image('virtual_buttons', 'assets/VirtualButtons.png');
+            this.load.image('virtual_dpad', 'assets/VirtualDPad.png');
+        }        
     }
 
     /**
@@ -86,11 +101,14 @@ export default abstract class BaseScene extends Phaser.Scene {
         let ctrls: ControlMethod [] = this.ctrlMethods;
         let numPads: integer = GamepadDeviceManager.getNumberOfDevices(this);      
         if (numPads != (ctrls.length + 1)) {
-            // refresh and splice
-            ctrls.splice(1);  // Assume 1st element will always be either Keyboard or VirtualPad
+            // keep keyboard/virtualpad at the end of array; gamepads have priority
+            let lastOptionCtrl: ControlMethod = ctrls[ctrls.length - 1];
+            console.log("lastOptionCtrl = " + lastOptionCtrl.constructor.name);
+            ctrls.splice(0); //clear array
             for (let i = 0; i < numPads; i++) {
                 ctrls.push(GamepadControlMethod.get(this, i));
-            }        
+            }
+            ctrls.push(lastOptionCtrl);
         }
     }
 
