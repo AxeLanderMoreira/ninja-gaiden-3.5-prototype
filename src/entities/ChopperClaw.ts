@@ -97,6 +97,7 @@ export default class ChopperClaw extends Enemy {
                         this.setState("descend");
                     }
                 });
+                break;
             case 'descend':
                 // TODO I've just thrown an arbitrary value here, but actually
                 // it should check the y position of the closest player.

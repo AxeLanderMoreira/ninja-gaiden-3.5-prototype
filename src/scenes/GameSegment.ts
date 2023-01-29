@@ -17,8 +17,9 @@ import Ninja from "../entities/Ninja";
 import PlayerHud from "../menus/PlayerHud";
 import PowerUp from "../entities/PowerUp";
 import TimeHud from "../menus/TimeHud";
-import ChopperClaw from "./ChopperClaw";
+import ChopperClaw from "../entities/ChopperClaw";
 import Enemy from "../entities/Enemy";
+import WaspRobot from "../entities/WaspRobot";
 
 /**
  * Contains all logic common to every Scene in this Game.
@@ -115,9 +116,10 @@ export default abstract class GameSegment extends BaseScene {
          * ENEMY ANIMS
         \*************************************************************************/
         ChopperClaw.initAnims(this);
+        DroidBall.initAnims(this);
         EnemyAlien.initAnims(this);
         EnemySoldier.initAnims(this);
-        DroidBall.initAnims(this);
+        WaspRobot.initAnims(this);
 
         /*************************************************************************\
          * EXPLOSION ANIMS
@@ -330,6 +332,7 @@ export default abstract class GameSegment extends BaseScene {
         Explod.preloadResources(this);
         Ninja.preloadResources(this);
         PowerUp.preloadResources(this);
+        WaspRobot.preloadResources(this);
       }
 
     /**

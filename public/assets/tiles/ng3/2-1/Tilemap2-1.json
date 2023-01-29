@@ -287,7 +287,7 @@
                  "rotation":0,
                  "visible":true,
                  "width":32,
-                 "x":1716.66666666667,
+                 "x":2570.67,
                  "y":1
                 }, 
                 {
@@ -305,8 +305,32 @@
                  "rotation":0,
                  "visible":true,
                  "width":32,
-                 "x":1844.66666666667,
+                 "x":2698.67,
                  "y":1
+                }, 
+                {
+                 "class":"",
+                 "gid":37,
+                 "height":32,
+                 "id":49,
+                 "name":"WaspRobot",
+                 "rotation":0,
+                 "visible":true,
+                 "width":32,
+                 "x":1550,
+                 "y":49.3333333333333
+                }, 
+                {
+                 "class":"",
+                 "gid":37,
+                 "height":32,
+                 "id":50,
+                 "name":"WaspRobot",
+                 "rotation":0,
+                 "visible":true,
+                 "width":32,
+                 "x":754.666666666667,
+                 "y":48.6666666666666
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -592,7 +616,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":49,
+ "nextobjectid":51,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",

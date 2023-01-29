@@ -4,13 +4,14 @@
 // https://opensource.org/licenses/MIT
 
 import { Globals } from "../Globals";
-import ChopperClaw from "../scenes/ChopperClaw";
+import ChopperClaw from "./ChopperClaw";
 import GameSegment from "../scenes/GameSegment";
 import DroidBall from "./DroidBall";
 import EnemyAlien from "./EnemyAlien";
 import EnemySoldier from "./EnemySoldier";
 import Entity from "./Entity";
 import PowerUp from "./PowerUp";
+import WaspRobot from "./WaspRobot";
 
 /**
  * Creates Entities (enemies, traps) from an object (or array of objects) taken
@@ -59,7 +60,6 @@ export default class EntityFactory {
 
     private static createEnemySoldier(obj: any): EnemySoldier {
         let sprite = EntityFactory.scene.enemyGroup.create(0, 0, 'enemy_soldier');
-        // TODO Adjust x and y based on origin, width and height
         sprite.setDepth(Globals.ENEMY_DEPTH);
         let ret: EnemySoldier = new EnemySoldier(EntityFactory.scene, sprite);
         sprite.setData('type', 'EnemySoldier');
@@ -79,6 +79,15 @@ export default class EntityFactory {
         return ret;
     }
 
+    private static createWaspRobot(obj: any): Entity {
+        let sprite = EntityFactory.scene.enemyGroup.create(0, 0, 'wasp_robot');
+        sprite.setDepth(Globals.ENEMY_DEPTH);
+        let ret: WaspRobot = new WaspRobot(EntityFactory.scene, sprite);
+        sprite.setData('type', 'WaspRobot');
+        sprite.setData('parent', ret);
+        return ret;
+    }
+
     public static makeOne(obj: any): Entity {
         let ret: Entity;
         console.log('[makeOne@EntityFactory] obj.name = ' + obj.name);
@@ -87,14 +96,13 @@ export default class EntityFactory {
             case 'DroidBall': ret = EntityFactory.createDroidBall(obj); break;
             case 'EnemyAlien': ret = EntityFactory.createEnemyAlien(obj); break;
             case 'EnemySoldier': ret = EntityFactory.createEnemySoldier(obj); break;
-            case 'PowerUp': ret = EntityFactory.createPowerUp(obj); break;            
+            case 'PowerUp': ret = EntityFactory.createPowerUp(obj); break;          
+            case 'WaspRobot': ret = EntityFactory.createWaspRobot(obj); break;  
             default: break;                
         }
         if (ret) {
-            //ret.placeInWorld(obj.x, obj.y);
             EntityFactory.scene.placeEntity(ret, obj.x, obj.y);
         }
-        // TODO Then we will apply any generic properties such as position and flipping;
         return ret;
     }    
 
