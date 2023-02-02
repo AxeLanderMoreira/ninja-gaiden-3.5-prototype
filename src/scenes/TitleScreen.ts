@@ -38,20 +38,11 @@ export default class TitleScreen extends BaseScene {
     }
 
     _createFullScreenIcon() {
-        let icon;
-        if (document.fullscreenEnabled) {
-            icon = this.add.sprite(Globals.SCREEN_WIDTH - 40, 8, 'full_screen_icon');
-            icon.setOrigin(0, 0);
-        }
-        this.input.on('pointerdown', pointer => {
-            if (icon) {
-                if (pointer.x >= icon.x && pointer.x < icon.x + icon.width &&
-                    pointer.y >= icon.y && pointer.y < icon.y + icon.height) {
-                    this._toggleFullScreen();
-                    return;
-                }
-            }
-        });
+        let icon = this.add.image(Globals.SCREEN_WIDTH - 40, 8, 'full_screen_icon').setInteractive();
+        icon.setOrigin(0, 0);
+        icon.on('pointerup', () => {
+            this._toggleFullScreen();
+        });        
     }
 
     create(ctx?: any) {
@@ -65,19 +56,20 @@ export default class TitleScreen extends BaseScene {
         this._buildPlayerPrompt(y + 8);
         if (this.hasTouchScreen()) {
             this._createFullScreenIcon();
-        }        
+        }
         this.cameras.main.fadeIn(1000);
         console.log('[TitleScreen.create] OUT');
     }
 
     private _toggleFullScreen() {
-        //if (!document.fullscreenElement) {
-        if (!this.fullscreen) {
-            document.documentElement.requestFullscreen();
-        } else {
-            document.exitFullscreen();
+        if (this.scale.isFullscreen)
+        {
+            this.scale.stopFullscreen();
         }
-        this.fullscreen = !this.fullscreen;
+        else
+        {
+            this.scale.startFullscreen();
+        }
     }
 
     private _openMenu() {
