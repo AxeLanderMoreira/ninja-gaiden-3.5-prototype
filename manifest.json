@@ -1,0 +1,27 @@
+{
+    "short_name": "Ninja Gaiden Prototype",
+    "name": "Ninja Gaiden Prototype",
+    "icons": [
+        {
+            "src": "./images/icons-vector.svg",
+            "type": "image/svg+xml",
+            "sizes": "133x133"
+        },
+        {
+            "src": "./images/icons-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "./images/icons-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "id": "https://arka.digital/Ninja",
+    "start_url": "./index.html",
+    "background_color": "#000000",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "scope": "https://arka.digital/Ninja/"
+}
