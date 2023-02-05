@@ -11,7 +11,6 @@ export default class Scene22A extends GameSegment {
     readonly LEVEL_WIDTH = Globals.SCREEN_WIDTH * 2; // 2 consecutive screens
     readonly BG_COLOR = '#000000';
     readonly BG_ANIM_PERIOD = 2000; // milliseconds
-    map: Phaser.Tilemaps.Tilemap;
     tileset: Phaser.Tilemaps.Tileset;
     mapPlatformLayer: Phaser.Tilemaps.TilemapLayer;
 
@@ -33,6 +32,7 @@ export default class Scene22A extends GameSegment {
         this.mapEnemiesLayer = this.map.getObjectLayer('Enemies'); // TODO Move to base class GameSegment
         this.mapPowerUpsLayer = this.map.getObjectLayer('PowerUps');
         this.mapWallsLayer = this.map.getObjectLayer('Walls'); // TODO Move to base class GameSegment
+        this.setupPowerUps();
         this.buildWalls(this.mapWallsLayer);
         EntityFactory.setScene(this);
         console.log('[Scene22A.create] END');

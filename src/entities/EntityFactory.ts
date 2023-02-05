@@ -71,7 +71,7 @@ export default class EntityFactory {
         let sprite = EntityFactory.scene.powerUpGroup.create(0, 0, 'power_up');
         sprite.setDepth(Globals.POWER_UP_DEPTH);
         
-        let variant = obj.gid - 38; // 38 is the first gid used for the mana power up
+        let variant = obj.gid - this.scene.firstPowerUpGid;
         console.log('[EntityFactory.createPowerUp] variant = ' + variant);
         let ret: PowerUp = new PowerUp(EntityFactory.scene, sprite, variant);
         sprite.setData('type', 'PowerUp');

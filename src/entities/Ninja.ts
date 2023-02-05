@@ -28,7 +28,9 @@ export default class Ninja extends Entity {
     static readonly MANA_INCREMENT = 10;     
     static readonly MAX_MANA_INCREMENT = 10; // Upon getting the max mana increase power up
     static readonly HP_INCREMENT = 6;
-    static readonly JUMP_SPEED = -250; // Initial jump velocity Y
+    static readonly JUMP_SPEED = -250;              // Initial jump up velocity when running or standing
+    static readonly JUMP_FROM_WALL_SPEED = -130;    // Initial jump up velocity when against a wall
+    static readonly JUMP_FROM_LEDGE_SPEED = -240;   // Initial jump up velocity when hanging from a ledge
     static readonly MAX_NUM_PLAYERS = 4;
     readonly slash_offset = {
         crouch_slash : {x:2,y:15},
@@ -231,8 +233,10 @@ export default class Ninja extends Entity {
                 this.jumping = true;
                 ninjaBody.allowGravity = true;
                 if (prevState == 'climb_idle' || prevState == 'climb_move') {
-                    this.sprite.setVelocityY(Ninja.JUMP_SPEED/2);
-                } else { // TODO Handle grab_idle or grab_move with a different jump speed?
+                    this.sprite.setVelocityY(Ninja.JUMP_FROM_WALL_SPEED);
+                } else if (prevState == 'grab_idle' || prevState == 'grab_move') {
+                    this.sprite.setVelocityY(Ninja.JUMP_FROM_LEDGE_SPEED);
+                } else {
                     this.sprite.setVelocityY(Ninja.JUMP_SPEED);
                 }
                 this.ledgeTop = undefined; // no longer bound to a ledge                
@@ -396,9 +400,20 @@ export default class Ninja extends Entity {
         return this.scene.physics.overlap(this.sprite, ledge);
     }
 
+    /**
+     * Invoked whenever there is an overlap between the Ninja and a ledge.
+     * @param ledge The ledge's rectangle
+     */
     onTouchedLedge(ledge: Phaser.GameObjects.GameObject) {
         //console.log('[Ninja.onTouchedLedge] IN');
-        if (this.jumping && this.sprite.body.velocity.y >= 0) { // include get_hit
+        
+        // First we check if Ninja is overlapping with the bottom of the ledge, and grab it;
+        // Otheriwse, then we check if Ninja is overlapping with the top of the ledge, and make it stand on top of it.
+        // In case of a regular jump, the action is only processed if during the jump's descent;
+        // In case of 'jump_reach' (up + a), the action is processed even on jump's ascent.
+        // This matches the state machine in the original game, and allows fast movement.
+        if ((this.jumping && this.sprite.body.velocity.y >= 0) || 
+             this.state == 'jump_reach') {
             Phaser.Display.Bounds.GetBounds(this.sprite, Ninja.rect1);
             Phaser.Display.Bounds.GetBounds(ledge, Ninja.rect2);
             let ny1 = Ninja.rect1.y;

@@ -42,7 +42,6 @@ export default class Scene21Desert extends GameSegment {
     mountainLayer: Phaser.GameObjects.TileSprite;
     bgRuins: Phaser.GameObjects.TileSprite;
     fgRuins: Phaser.GameObjects.TileSprite;
-    map: Phaser.Tilemaps.Tilemap;
     tileset: Phaser.Tilemaps.Tileset;
     mapPlatformLayer: Phaser.Tilemaps.TilemapLayer;
     mapQuicksandLayer: Phaser.Tilemaps.ObjectLayer;
@@ -96,6 +95,7 @@ export default class Scene21Desert extends GameSegment {
         this.mapWallsLayer = this.map.getObjectLayer('Walls'); // TODO Move to base class GameSegment
         this.mapQuicksandLayer = this.map.getObjectLayer('Quicksand'); // specific to 2-1
         this.quicksandBoxes = this.physics.add.staticGroup();
+        this.setupPowerUps();
         this.buildWalls(this.mapWallsLayer);
         this._placeQuicksandPuddles();
         EntityFactory.setScene(this);

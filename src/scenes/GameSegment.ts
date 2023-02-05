@@ -45,8 +45,10 @@ export default abstract class GameSegment extends BaseScene {
     enemies: Enemy[];  // for general logic and state machine
     enemyGroup: Phaser.Physics.Arcade.Group;   // for physics and collision handling
     enemyNinjaCollider: Phaser.Physics.Arcade.Collider;
+    firstPowerUpGid: integer;
     fpsHud: FpsHud;
     initialTimerValue: number;  // time to beat this level, in milliseconds
+    map: Phaser.Tilemaps.Tilemap;
     mapBackgroundLayer: Phaser.Tilemaps.TilemapLayer;
     mapEnemiesLayer: Phaser.Tilemaps.ObjectLayer;
     mapPowerUpsLayer: Phaser.Tilemaps.ObjectLayer;
@@ -399,6 +401,7 @@ export default abstract class GameSegment extends BaseScene {
           }
         });
         this.physics.collide(this.powerUpGroup, this.getMapPlatformLayer());
+        this.physics.collide(this.powerUpGroup, this.platformGroup);
 
         /* Update the status of each player, and calculate the median point where to
            move the camera focus */
@@ -492,6 +495,26 @@ export default abstract class GameSegment extends BaseScene {
         arr.push(spr);
       }
       return arr;
+    }
+
+    /**
+     * This method has to be invoked from the suclass' create() method, and
+     * requires this.map to be initialized.
+     * TODO Refactor all TileMap/Tileset processing to centralize everything
+     * here in the base class, parameterizing from the subclass as required.
+     */
+    protected setupPowerUps() {
+      // This function is required because we use Tiled's `gid` field to 
+      // identify which PowerUp has to be instantiated, and the `gid` base 
+      // value may vary between each Scene's Tilemaps.
+      //this.map.
+      //let objs = this.mapPowerUpsLayer.objects;
+      //for (obj)
+      this.map.tilesets.forEach(tileset => {
+        if (tileset.name == 'PowerUp') {
+          this.firstPowerUpGid = tileset.firstgid;
+        }
+      });
     }
 
     private _placePowerUps() {
