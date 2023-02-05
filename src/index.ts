@@ -8,11 +8,12 @@ import config from './config';
 import GameOver from './scenes/GameOver';
 import MenuScreen from './scenes/MenuScreen';
 import Scene21Desert from './scenes/Scene21Desert';
+import Scene22A from './scenes/Scene22A';
 import TitleScreen from './scenes/TitleScreen';
 
 
 new Phaser.Game(
   Object.assign(config, {
-    scene: [TitleScreen, MenuScreen, Scene21Desert, GameOver]
+    scene: [TitleScreen, MenuScreen, Scene21Desert, Scene22A, GameOver]
   })
 );

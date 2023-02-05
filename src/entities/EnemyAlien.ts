@@ -48,7 +48,7 @@ export default class EnemyAlien extends Enemy {
         console.log("[EnemyAlien constructor] this.facing = " + this.facing);
     }
 
-    onBeginState(newState: string): void {
+    onBeginState(oldState: string, newState: string): void {
         console.log("[EnemyAlien.obBeginState] (" + newState + ")");
         switch(newState) {
             case 'jump':
@@ -59,7 +59,7 @@ export default class EnemyAlien extends Enemy {
                 this.sprite.setVelocity(this.WALKING_SPEED * this.facing, 0);
                 break;
         }
-        super.onBeginState(newState);
+        super.onBeginState(oldState, newState);
     }
 
     onEndState(state: string, newState: string): void {

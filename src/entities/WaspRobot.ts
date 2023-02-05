@@ -34,7 +34,7 @@ export default class WaspRobot extends Enemy {
         this.setState('fly');
     }
 
-    onBeginState(newState: string): void {
+    onBeginState(oldState: string, newState: string): void {
         switch(newState) {
             case 'fly':
                 this._chaseNearestPlayer();
@@ -42,7 +42,7 @@ export default class WaspRobot extends Enemy {
             default:
                 break;
         }
-        super.onBeginState(newState);
+        super.onBeginState(oldState, newState);
     }    
 
     onEndState(state: string, newState: string) {

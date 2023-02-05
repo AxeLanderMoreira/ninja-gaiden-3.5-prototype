@@ -45,15 +45,14 @@ export default class MenuScreen extends BaseScene {
     ctrlIcons: Phaser.GameObjects.Sprite[];
     numPlayersSelected: integer;
     playerFaces: Phaser.GameObjects.Sprite[];    
+    //private static readonly START_LEVEL_NAME = 'Scene21Desert';
+    private static readonly START_LEVEL_NAME = 'Scene22A';
 
     /**
      * 
      */
     constructor() {
-        super('MenuScreen');
-        this.page = MenuScreen.PAGE_SELECT_NUM_PLAYERS;
-        this.optionIndex = 0;
-        this.optionIndex = 0;
+        super('MenuScreen');        
         this.menuOptionGlyphs = [];
         this.containers = [];
         this.assignedIndices = [];
@@ -65,6 +64,9 @@ export default class MenuScreen extends BaseScene {
      */
     create(data?: any) {
         super.create(data);
+        this.page = MenuScreen.PAGE_SELECT_NUM_PLAYERS;
+        this.optionIndex = 0;
+        this.transitionInProgress = false;
         this.font = new SpriteFont(this);
         this.maxPlayers = this.ctrlMethods.length;
         console.log('[MenuScreen.create] this.maxPlayers = ' + this.maxPlayers);
@@ -243,11 +245,13 @@ export default class MenuScreen extends BaseScene {
      * 
      */
     private _startGame() {
-        if (this.transitionInProgress) return;
+        if (this.transitionInProgress) {
+            return;
+        }
         this.transitionInProgress = true;
         this.cameras.main.fadeOut(1000, 0, 0, 0, (_camera, _progress) => {
             if (_progress >= 1) {                
-                this.scene.start('Scene21Desert', {
+                this.scene.start(MenuScreen.START_LEVEL_NAME, {
                     numPlayers: this.numPlayersSelected,
                     ctrlMethods: this.ctrlMethods,
                     assignedIndices: this.assignedIndices

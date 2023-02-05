@@ -8,9 +8,13 @@ import GameSegment from "../scenes/GameSegment";
 import Entity from "./Entity";
 import PowerUp from "./PowerUp";
 
-export default class Ninja extends Entity {    
+export default class Ninja extends Entity {  
+    static rect1: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
+    static rect2: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
+
     sword: Phaser.Physics.Arcade.Sprite;    
     static readonly WALKING_SPEED = 96;
+    static readonly LEDGE_MOVING_SPEED = 48;
     static readonly QUICKSAND_WALKING_SPEED = 32;
     static readonly QUICKSAND_FALLING_SPEED = 8;
     static readonly QUICKSAND_LIMIT_Y = 140; // TODO Hardcoded for test purposes only... we have to deal more generically
@@ -35,13 +39,21 @@ export default class Ninja extends Entity {
     currentPower: integer;
     invincible: boolean;
     jumping: boolean = false;
+    /** ledge that player is currently standing on top of */
+    ledgeTop?: Phaser.GameObjects.GameObject;      
+    /* ledge that player just jumped down from while standing on top of (but still can grab) */
+    ledgeTopOut?: Phaser.GameObjects.GameObject;
+    /** ledge that player is currently grabbing */
+    ledgeBottom?: Phaser.GameObjects.GameObject;
+    /* ledge that player just jumped down from while grabbing */
+    ledgeBottomOut?: Phaser.GameObjects.GameObject;
     lives: integer;
     mana: integer;
     maxMana: integer;
     powerUp: boolean; // sword is powered up   
     quicksand: boolean;
-    timedEvent?: Phaser.Time.TimerEvent; 
-    wall?: Phaser.GameObjects.GameObject; /**< the wall the ninja is currently sticked to/climbing */
+    timedEvent?: Phaser.Time.TimerEvent;     
+    wall?: Phaser.GameObjects.GameObject; /**< the wall the ninja is currently sticked to/climbing */    
 
     /**
      * 
@@ -55,6 +67,8 @@ export default class Ninja extends Entity {
             scene.createAnim(key, 0, 'crouch_idle', {start: 20, end: 21}, 200, -1);
             scene.createAnim(key, 0, 'crouch_slash', {start: 22, end: 24}, Ninja.SLASH_SPEED, 0);
             scene.createAnim(key, 0, 'get_hit', {frames: [9]}, 200, -1);
+            scene.createAnim(key, 0, 'grab_idle', {frames: [25]}, 200, -1);
+            scene.createAnim(key, 0, 'grab_move', {frames: [25, 28, 29, 28]}, 400, -1);
             scene.createAnim(key, 0, 'jump_descend', {start: 14, end: 15}, 200, -1);
             scene.createAnim(key, 0, 'jump_reach', {frames: [25]}, 200, -1);
             scene.createAnim(key, 0, 'jump_slash', {start: 16, end: 18}, Ninja.SLASH_SPEED, 0);
@@ -106,8 +120,7 @@ export default class Ninja extends Entity {
      * @param sprite 
      * @param sword 
      */
-    respawn(/*ctrlMethod: ControlMethod,*/ sprite: Phaser.Physics.Arcade.Sprite, sword: Phaser.Physics.Arcade.Sprite) {
-        
+    respawn(sprite: Phaser.Physics.Arcade.Sprite, sword: Phaser.Physics.Arcade.Sprite) {    
         this.sprite = sprite;
         this.sword = sword;
         sprite.setData('parent', this);
@@ -135,11 +148,24 @@ export default class Ninja extends Entity {
     getMaxMana(): integer {
         return this.maxMana;
     }
+
+    /**
+     * Checks if player is allowed to jump in the specified direction. Tested
+     * when player is climbing against a wall.
+     * @param direction -1 facing left, +1 facing right
+     */
+    isAllowedToJump(direction: integer): boolean {
+        if (direction == this.facing) {
+            return this.reachedWallTop();
+        } else {
+            return true;
+        }
+    }
     
-    onBeginState(state: string) {
-        console.log("beginning state " + state );     
+    onBeginState(prevState: string, newState: string) {
+        console.log("beginning state " + newState );     
         const ninjaBody : Phaser.Physics.Arcade.Body = this.sprite.body;   
-        switch(state) {
+        switch(newState) {
             case "climb_idle":
                 this.jumping = false;
                 ninjaBody.allowGravity = false;
@@ -163,8 +189,9 @@ export default class Ninja extends Entity {
                 break;
             case "get_hit":                
                 this.invincible = true;                
-                this.jumping = true;
+                this.jumping = true;                
                 ninjaBody.allowGravity = true;
+                this.ledgeTop = undefined; // no longer bound to a ledge
                 // Code below has no effect at all
                 /*if (this.onFloor()) { // remove from floor
                     console.log("Remove from floor ")
@@ -172,14 +199,23 @@ export default class Ninja extends Entity {
                 }*/
                 console.log('[Ninja.onBeginState(get_hit)]  After sprite.setPosition = ' + this.sprite.body.velocity.y);
                 break;
+            case "grab_idle":
+                ninjaBody.allowGravity = false;
+                this.sprite.setVelocity(0, 0);
+                this.sprite.setAcceleration(0);
+                this.jumping = false;
+                break;
             case "jump_descend":
                 this.jumping = true;
                 ninjaBody.allowGravity = true;
+                this.ledgeTopOut = this.ledgeTop; // mark the ledge where I jumped from
+                this.ledgeTop = undefined; // no longer bound to a ledge                
                 break;
             case "jump_reach":
                 this.jumping = true;
                 ninjaBody.allowGravity = true;
                 this.sprite.setVelocityY(Ninja.JUMP_SPEED);                
+                this.ledgeTop = undefined; // no longer bound to a ledge                
                 break;
             case "jump_slash":
                 this.jumping = true;
@@ -189,11 +225,17 @@ export default class Ninja extends Entity {
                 {
                     this.setState("jump_descend");
                 });
+                this.ledgeTop = undefined; // no longer bound to a ledge                
                 break;
             case "jump_sommersault":
                 this.jumping = true;
                 ninjaBody.allowGravity = true;
-                this.sprite.setVelocityY(Ninja.JUMP_SPEED);                
+                if (prevState == 'climb_idle' || prevState == 'climb_move') {
+                    this.sprite.setVelocityY(Ninja.JUMP_SPEED/2);
+                } else { // TODO Handle grab_idle or grab_move with a different jump speed?
+                    this.sprite.setVelocityY(Ninja.JUMP_SPEED);
+                }
+                this.ledgeTop = undefined; // no longer bound to a ledge                
                 break;
             case "stand_idle":
                 this.jumping = false;
@@ -215,7 +257,7 @@ export default class Ninja extends Entity {
                 // TODO
                 break;
         }
-        super.onBeginState(state);
+        super.onBeginState(prevState, newState);
     }
 
     /**
@@ -232,6 +274,9 @@ export default class Ninja extends Entity {
             case "crouch_slash":
                 this.sprite.off("animationcomplete");
                 this.undrawSword();
+                break;
+            case "jump_descend":
+                this.ledgeBottomOut = undefined; // reset flag after dropping off a ledge
                 break;
             case "jump_slash":
                 this.sprite.off("animationcomplete");
@@ -327,20 +372,58 @@ export default class Ninja extends Entity {
             }
             this.setState('get_hit');            
         } else {
-            this.lives--;
-            this.hp = 0;
-            this.invincible = true;
-            if (this.timedEvent) {
-                this.timedEvent.remove();
-                delete this.timedEvent;
-            }
-            this.scene.onPlayerKOed(this);
+            this.loseLife();
         }
         return true;
     }
 
+    loseLife() {
+        this.lives--;
+        this.hp = 0;
+        this.invincible = true;
+        if (this.timedEvent) {
+            this.timedEvent.remove();
+            delete this.timedEvent;
+        }
+        this.scene.onPlayerKOed(this);
+    }
+
+    /**
+     * Checked while in 'grab_move' state
+     * @param ledge 
+     */
+    stillGrabbingLedge(ledge: Phaser.GameObjects.GameObject) {
+        return this.scene.physics.overlap(this.sprite, ledge);
+    }
+
+    onTouchedLedge(ledge: Phaser.GameObjects.GameObject) {
+        //console.log('[Ninja.onTouchedLedge] IN');
+        if (this.jumping && this.sprite.body.velocity.y >= 0) { // include get_hit
+            Phaser.Display.Bounds.GetBounds(this.sprite, Ninja.rect1);
+            Phaser.Display.Bounds.GetBounds(ledge, Ninja.rect2);
+            let ny1 = Ninja.rect1.y;
+            let ny2 = Ninja.rect1.y + Ninja.rect1.height;
+            let ly1 = Ninja.rect2.y;
+            let ly2 = Ninja.rect2.y + Ninja.rect2.height;
+            console.log("[Ninja.onTouchedLedge]  ledge == this.ledgeBottomOut");
+            if (ledge != this.ledgeBottomOut && ny1 >= ly1 && ny1 <= ly2) {
+                //console.log('[Ninja.onTouchedLedge] GRAB BOTTOM OF LEDGE');
+                this.setState('grab_idle');
+                this.ledgeBottom = ledge;
+                this.ledgeBottomOut = undefined;
+                //this.sprite.body.y = 
+                // TODO Force position of the hands to ly1 + (Ninja.rect2.height / 2);
+            } else if (ledge != this.ledgeTopOut && ny2 >= ly1 && ny2 <= ly2) { // not the ledge I jumped from
+                console.log('[Ninja.onTouchedLedge] WALK ON TOP OF LEDGE');
+                // TODO Have ledgeTop, ledgeBottom, ledgeOut?
+                this.ledgeTop = ledge;
+                this.ledgeTopOut = undefined;
+            }
+        }
+    }
+
     onTouchedWall(wall: Phaser.GameObjects.GameObject, direction: integer) {
-        if (this.jumping) {
+        if (this.jumping) { // include get_hit
             this.turn(direction);
             if (this.state == 'get_hit') {
                 this.setTimedInvincibility();
@@ -476,7 +559,21 @@ private _recalculateOffset() {
             case 'climb_idle':     
                 console.log('ninjaBody.allowGravity before = ' + ninjaBody.allowGravity);
                 ninjaBody.allowGravity = false; // prevent bugs of having the player slide down the wall
-                if(ctrl.held('up')) {
+                if (ctrl.held('a')) {
+                    if (ctrl.held('right')) {
+                        if (this.isAllowedToJump(1)) {
+                            this.setState('jump_sommersault');
+                            this.turn (1);
+                            this.sprite.setVelocityX(Ninja.WALKING_SPEED);
+                        }                        
+                    } else if (ctrl.held('left')) {
+                        if (this.isAllowedToJump(-1)) {
+                            this.setState('jump_sommersault');
+                            this.turn (-1);
+                            this.sprite.setVelocityX(-Ninja.WALKING_SPEED);
+                        }
+                    }
+                } else if(ctrl.held('up')) {
                     if (this.reachedWallTop()) {
                         break;
                     }
@@ -485,17 +582,6 @@ private _recalculateOffset() {
                 } else if (ctrl.held('down')) {
                     this.sprite.setVelocityY(Ninja.WALKING_SPEED);
                     this.setState('climb_move');
-                }
-                if (ctrl.held('a')) {                    
-                    this.setState(ctrl.held('up') ? 'jump_reach' : 'jump_sommersault');
-                    if (ctrl.held('right')) {
-                        this.turn (1);
-                        this.sprite.setVelocityX(Ninja.WALKING_SPEED);
-                    } else if (ctrl.held('left')) {
-                        this.turn (-1);
-                        this.sprite.setVelocityX(-Ninja.WALKING_SPEED);
-                    }
-                    // TODO Handle cursor_down
                 }
                 break;
             case 'climb_move':
@@ -514,23 +600,28 @@ private _recalculateOffset() {
                         this.setState('stand_idle');
                     }
                 }
-                if (ctrl.held('up')) {
+                if (ctrl.held('a')) {                    
+                    if (ctrl.held('right')) {
+                        if (this.isAllowedToJump(1)) {
+                            idle = false;
+                            this.setState('jump_sommersault');
+                            this.turn (1);
+                            this.sprite.setVelocityX(Ninja.WALKING_SPEED);
+                        }                        
+                    } else if (ctrl.held('left')) {
+                        if (this.isAllowedToJump(-1)) {
+                            idle = false;
+                            this.setState('jump_sommersault');
+                            this.turn (-1);
+                            this.sprite.setVelocityX(-Ninja.WALKING_SPEED);
+                        }
+                    }
+                } else if (ctrl.held('up')) {
                     idle = false;
                     this.sprite.setVelocityY(-Ninja.WALKING_SPEED);
                 } else if (ctrl.held('down')) {
                     idle = false;
                     this.sprite.setVelocityY(Ninja.WALKING_SPEED);
-                }
-                if (ctrl.held('a')) {                    
-                    idle = false;
-                    this.setState(ctrl.held('up') ? 'jump_reach' : 'jump_sommersault');
-                    if (ctrl.held('right')) {
-                        this.turn (1);
-                        this.sprite.setVelocityX(Ninja.WALKING_SPEED);
-                    } else if (ctrl.held('left')) {
-                        this.turn (-1);
-                        this.sprite.setVelocityX(-Ninja.WALKING_SPEED);
-                    }
                 }
                 if (idle) {
                     this.setState('climb_idle');
@@ -546,10 +637,14 @@ private _recalculateOffset() {
                     this.turn(1);
                     this.sprite.setVelocityX(Ninja.WALKING_SPEED);
                 } else if (ctrl.held('b')) { // sword
-                    this.setState('crouch_slash');                    
+                    this.setState('crouch_slash');
+                } else if (ctrl.held('a')) { // jump
+                    if (!!this.ledgeTop) { // bound to a ledge?
+                        this.setState('jump_descend'); // will set ledge to undefined
+                    }
                 } else if (!ctrl.held('down')) {
                     this.setState('stand_idle');
-                }
+                } 
                 break;
             case 'crouch_slash':
                 this._testSwordHit();
@@ -562,8 +657,69 @@ private _recalculateOffset() {
                     this.setTimedInvincibility();                    
                 }
                 break;
+            case 'grab_idle':
+                if (ctrl.held('right')) {
+                    this.setState('grab_move');
+                    this.turn(1);
+                    this.sprite.setVelocityX(this.facing * Ninja.LEDGE_MOVING_SPEED);
+                } else if (ctrl.held('left')) {
+                    this.setState('grab_move');
+                    this.turn(-1);
+                    this.sprite.setVelocityX(this.facing * Ninja.LEDGE_MOVING_SPEED);
+                } else if (ctrl.held('a')) {
+                    if (ctrl.held('down')) {
+                        // jump down
+                        this.setState('jump_descend');
+                        this.ledgeBottomOut = this.ledgeBottom;
+                        this.ledgeBottom = undefined;
+                    } else {
+                        // jump up (side or neutral
+                        this.setState('jump_sommersault');
+                        this.ledgeBottom = this.ledgeBottomOut = undefined;
+                    }                    
+                }
+                break;
+            case 'grab_move':
+                if (ctrl.held('left')) { // keep hanging on ledge
+                    idle = false;
+                    if (this.facing > 0) {
+                        this.turn(-1);
+                        this.sprite.setVelocityX(this.facing * Ninja.LEDGE_MOVING_SPEED);
+                    }
+                } else if (ctrl.held('right')) { // keep hanging on ledge
+                    idle = false;
+                    if (this.facing > 0) {
+                        this.turn(1);
+                        this.sprite.setVelocityX(this.facing * Ninja.LEDGE_MOVING_SPEED);
+                    }
+                }
+                if (!idle && !this.stillGrabbingLedge(this.ledgeBottom)) {                    
+                    this.setState('jump_descend');
+                    this.ledgeBottomOut = this.ledgeBottom;
+                    this.ledgeBottom = undefined;
+                }
+                if (ctrl.held('a')) {
+                    if (ctrl.held('down')) {
+                        // jump down
+                        idle = false;
+                        this.setState('jump_descend');
+                        this.ledgeBottomOut = this.ledgeBottom;
+                        this.ledgeBottom = undefined;
+                    } else {
+                        // jump up (side or neutral
+                        idle = false;
+                        this.setState('jump_sommersault');
+                        this.ledgeBottom = this.ledgeBottomOut = undefined;
+                    }
+                }                
+                if (idle) {
+                    this.setState('grab_idle');
+                }
+                break;
             case 'jump_descend':
-                if (this.onFloor()) {
+                if (this.fellOutOfBounds()) {
+                    this.loseLife();
+                } else if (this.onFloor()) {
                     this.setState('stand_idle');
                 } else if (ctrl.held('b')) { // sword
                     idle = false;
@@ -575,7 +731,9 @@ private _recalculateOffset() {
                 }
                 break;
             case 'jump_reach':
-                if (this.onFloor()) {
+                if (this.fellOutOfBounds()) {
+                    this.loseLife();
+                } else if (this.onFloor()) {
                     this.setState('stand_idle');
                 } else if (ctrl.held('b')) { // sword
                     this.setState('jump_slash');
@@ -654,6 +812,10 @@ private _recalculateOffset() {
                 if (ctrl.held('a')) { // jump
                     if (ctrl.held('up')) { // straight jump
                         this.setState('jump_reach'); // atenção para a animação de hang (braços para cima)...
+                    } else if (ctrl.held('down')) {
+                        if (!!this.ledgeTop) { // bound to a ledge?                            
+                            this.setState('jump_descend'); // will set ledge to undefined                            
+                        }
                     } else { // sommersault jump
                         this.setState('jump_sommersault');
                     }
@@ -678,6 +840,16 @@ private _recalculateOffset() {
         }
 
     } 
+
+
+    fellOutOfBounds(): boolean {
+        let lb = this.scene.getLowerBounds();
+        if (lb && this.sprite.body.y > lb) {
+            return true;
+        }
+        return false;
+    }
+
     private _testSwordHit() {
         if (!this.sword.visible || this.sword.anims.currentFrame.index != 2) {
             return;

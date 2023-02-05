@@ -47,6 +47,7 @@ export default abstract class GameSegment extends BaseScene {
     enemyNinjaCollider: Phaser.Physics.Arcade.Collider;
     fpsHud: FpsHud;
     initialTimerValue: number;  // time to beat this level, in milliseconds
+    mapBackgroundLayer: Phaser.Tilemaps.TilemapLayer;
     mapEnemiesLayer: Phaser.Tilemaps.ObjectLayer;
     mapPowerUpsLayer: Phaser.Tilemaps.ObjectLayer;
     mapWallsLayer: Phaser.Tilemaps.ObjectLayer;
@@ -168,16 +169,33 @@ export default abstract class GameSegment extends BaseScene {
         this.platformNinjaCollider = this.physics.add.collider(
             this.playerGroup,
             this.platformGroup,
-            (_sprite, _platform) => {
-                let ninja = _sprite.getData('parent');
-                if (_sprite.body.touching.right && _platform.body.touching.left)
-                {
-                    ninja.onTouchedWall(_platform, 1);
-                } else if (_sprite.body.touching.left && _platform.body.touching.right)
-                {
-                    ninja.onTouchedWall(_platform, -1);
-                }
-            });
+            (_sprite, _platform) => { /* collideCalback */
+               let ninja = _sprite.getData('parent');
+               switch (_platform.name) {
+                case 'Wall': 
+                  if (_sprite.body.touching.right && _platform.body.touching.left)
+                  {
+                      ninja.onTouchedWall(_platform, 1);
+                  } else if (_sprite.body.touching.left && _platform.body.touching.right)
+                  {
+                      ninja.onTouchedWall(_platform, -1);
+                  }
+                  break;
+                case 'Ledge':
+                  //  no effect here
+                  break;
+               }
+            },
+            (_sprite, _platform) => { /* processCallback */
+            let ninja = _sprite.getData('parent');
+              switch (_platform.name) {
+                case 'Wall': 
+                  return true;
+                case 'Ledge':
+                  ninja.onTouchedLedge(_platform);
+                  return (!!ninja.ledgeTop);
+              }
+        });
 
         this.enemyNinjaCollider = this.physics.add.overlap(
             this.enemyGroup,
@@ -247,9 +265,38 @@ export default abstract class GameSegment extends BaseScene {
     }
 
     /**
+     * Adds Walls to this level, taken from an ObjectLayer parsed from json
+     * file generated in Teiled tool.
+     * 
+     * It actually builds not only Walls, but Ledges and any other kind of 
+     * platform that has non-trivial, semi-solid properties.
+     * 
+     * @param layer The source layer
+     */
+    buildWalls(layer: Phaser.Tilemaps.ObjectLayer) {
+      let objs = layer.objects;
+      objs.forEach((o, i) => {
+          let wall = this.add.rectangle(o.x, o.y, o.width, o.height, 0x000000, 0);
+          wall.name = o.name; // may be 'Wall', 'Ledge', etc.
+          wall.setOrigin(0, 0);
+          this.platformGroup.add(wall);
+      });
+    }
+
+    /**
      * 
      */
     abstract getLevelWidth(): number;
+
+    /**
+     * If the level has lower bounds where the player or an enemy can fall 
+     * through, this function has to be overwritten.
+     * @returns 0 if the level doesn't have lower bounds, or a poitive integer
+     * with the lower bounds y-coordinate.
+     */
+    getLowerBounds(): integer {
+      return 0;      
+    }
 
     /**
      * 

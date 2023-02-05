@@ -94,7 +94,7 @@ export default abstract class Entity {
      * 
      * @param newState 
      */
-    onBeginState(newState: string) {
+    onBeginState(oldState: string, newState: string) {
         console.log('now playing anim ' +  this.sprite.texture.key + "." + newState);
         let anim_key = this.sprite.texture.key;
         if (this.variant) {
@@ -139,8 +139,9 @@ export default abstract class Entity {
         this.stateT0 = this.scene.time.now;
         //console.log('T0 on setState = ' + this.stateT0);
         this.onEndState(this.state, state);
+        let oldState = this.state;
         this.state = state;
-        this.onBeginState(this.state);        
+        this.onBeginState(oldState, this.state);        
     }
 
     /** 

@@ -45,7 +45,7 @@ export default class DroidBall extends Enemy {
         
     }
 
-    onBeginState(newState: string) {        
+    onBeginState(oldState: string, newState: string) {        
         switch(newState) {
             case 'bounce':
                 this._bounce(); // First bounce is always away
@@ -53,7 +53,7 @@ export default class DroidBall extends Enemy {
             default:
                 break;
         }
-        super.onBeginState(newState);
+        super.onBeginState(oldState, newState);
     }
 
     onEndState(state: string, newState: string) {

@@ -33,7 +33,6 @@ export default class TitleScreen extends BaseScene {
         this.hasPadGlyphs = [];
         this.numPads = 0;
         this.fullscreen = false;
-        this.transitionInProgress = false;
         console.log('[constructor@TitleScreen] OUT');
     }
 
@@ -48,6 +47,7 @@ export default class TitleScreen extends BaseScene {
     create(ctx?: any) {
         console.log('[TitleScreen.create] IN');
         super.create(ctx);
+        this.transitionInProgress = false;
         this.cameras.main.setBackgroundColor(TitleScreen.BG_COLOR);
         this.bg = this.add.image(0, 0, 'title_screen');
         this.bg.setOrigin(0, 0);
@@ -69,6 +69,7 @@ export default class TitleScreen extends BaseScene {
         else
         {
             this.scale.startFullscreen();
+            this.scale.lockOrientation('landscape'); // no effect?
         }
     }
 
@@ -132,7 +133,7 @@ export default class TitleScreen extends BaseScene {
     }
 
     update(time: number, delta: number): void {
-        super.update(time, delta);        
+        super.update(time, delta);
         let numPads = this.ctrlMethods.length - 1;
         if (numPads != this.numPads) {
             this.numPads = numPads;

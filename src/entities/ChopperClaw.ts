@@ -49,7 +49,7 @@ export default class ChopperClaw extends Enemy {
         this.setState('wait');
     }
 
-    onBeginState(newState: string): void {
+    onBeginState(oldState: string, newState: string): void {
         switch(newState) {
             case 'wait':
                 this.sprite.setVelocity(0);
@@ -74,7 +74,7 @@ export default class ChopperClaw extends Enemy {
                 // TODO
                 break;
         }
-        super.onBeginState(newState);
+        super.onBeginState(oldState, newState);
     }
 
     onEndState(state: string, newState: string) {

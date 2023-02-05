@@ -38,11 +38,11 @@ export default class PowerUp extends Entity {
         this.setState('glow');
     }
 
-    onBeginState(newState: string) {
+    onBeginState(oldState: string, newState: string) {
         if (newState == 'fall') {
             this.sprite.body.allowGravity = true;
         }
-        super.onBeginState(newState);
+        super.onBeginState(oldState, newState);
     }
     
     onEndState(state: string, newState: string) {

@@ -27,7 +27,7 @@ export default class EnemySoldier extends Enemy {
         this.setState('walk');
     }
 
-    onBeginState(newState: string): void {
+    onBeginState(oldState: string, newState: string): void {
         switch(newState) {
             case 'walk':
                 this.sprite.setVelocity(this.WALKING_SPEED *this.facing, 0);
@@ -35,7 +35,7 @@ export default class EnemySoldier extends Enemy {
             default:
                 break;
         }
-        super.onBeginState(newState);
+        super.onBeginState(oldState, newState);
     }
 
     onEndState(state: string, newState: string) {

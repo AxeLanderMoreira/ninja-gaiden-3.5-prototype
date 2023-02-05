@@ -32,12 +32,10 @@ import GameSegment from "./GameSegment";
  * 020: sand pattern top #2
  * 021: above ground top
  * 022: above ground bottom
- * 
  */
 
 export default class Scene21Desert extends GameSegment {
     readonly LEVEL_WIDTH = Globals.SCREEN_WIDTH * 10; // 10 consecutive screens
-    readonly FLOOR_LEVEL = 144;
     readonly BG_COLOR = '#7c0800';
     readonly TIME_TO_BEAT = 250000; // Time to beat this level, in seconds
     cloudLayer: Phaser.GameObjects.TileSprite;
@@ -64,9 +62,9 @@ export default class Scene21Desert extends GameSegment {
         console.log('[constructor@Scene21Desert] END');
     }
 
-    create(data?: any) {
+    create(ctx?: any) {
         console.log('[Scene21Desert.create] BEGIN');
-        super.create(data);
+        super.create(ctx);
         this.cloudLayer = this.add.tileSprite(0, 0, this.LEVEL_WIDTH, 90, 'clouds');
         this.mountainLayer = this.add.tileSprite(0, 18, this.LEVEL_WIDTH, 90, 'mountains');
         this.bgRuins = this.add.tileSprite(0, 72, this.LEVEL_WIDTH, 36, 'bgruins');
@@ -84,8 +82,8 @@ export default class Scene21Desert extends GameSegment {
         this.cameras.main.setBounds(0, 0, this.LEVEL_WIDTH, 216); // TODO get from a single configuration
         this.cameras.main.setBackgroundColor(this.BG_COLOR);
 
-        this.map = this.make.tilemap({key: 'map'});
-        this.tileset = this.map.addTilesetImage('Tileset2-1', 'tiles');
+        this.map = this.make.tilemap({key: 'map2-1'});
+        this.tileset = this.map.addTilesetImage('Tileset2-1', 'tiles2-1');
         this.mapPlatformLayer = this.map.createLayer('Platforms', 'Tileset2-1');
         this.mapBackgroundLayer = this.map.createLayer('Background', 'Tileset2-1');
         this.mapPlatformLayer.setCollision([1, 2, 17, 21]);
@@ -98,7 +96,7 @@ export default class Scene21Desert extends GameSegment {
         this.mapWallsLayer = this.map.getObjectLayer('Walls'); // TODO Move to base class GameSegment
         this.mapQuicksandLayer = this.map.getObjectLayer('Quicksand'); // specific to 2-1
         this.quicksandBoxes = this.physics.add.staticGroup();
-        this._buildWalls();
+        this.buildWalls(this.mapWallsLayer);
         this._placeQuicksandPuddles();
         EntityFactory.setScene(this);
         console.log('[Scene21Desert.create] END');
@@ -123,16 +121,6 @@ export default class Scene21Desert extends GameSegment {
             this.quicksandBoxes.add(box);            
         });
     }
-
-    // TODO Move to base class GameSegment
-    private _buildWalls() {
-        let objs = this.mapWallsLayer.objects;
-        objs.forEach((o, i) => {
-            let wall = this.add.rectangle(o.x, o.y, o.width, o.height, 0x000000, 0);
-            wall.setOrigin(0, 0);
-            this.platformGroup.add(wall);
-        });
-    }
     
     getLevelWidth(): number {
         return this.LEVEL_WIDTH;
@@ -149,8 +137,8 @@ export default class Scene21Desert extends GameSegment {
         this.load.image('bgruins', 'assets/tiles/ng3/2-1/bgruins.png');
         this.load.image('fgruins', 'assets/tiles/ng3/2-1/fgruins.png');
         this.load.image('quicksand', 'assets/tiles/ng3/2-1/Quicksand.png')
-        this.load.image('tiles', 'assets/tiles/ng3/2-1/Tileset2-1.png');
-        this.load.tilemapTiledJSON('map', 'assets/tiles/ng3/2-1/Tilemap2-1.json');        
+        this.load.image('tiles2-1', 'assets/tiles/ng3/2-1/Tileset2-1.png');
+        this.load.tilemapTiledJSON('map2-1', 'assets/tiles/ng3/2-1/Tilemap2-1.json');        
     }
 
     stop() {
