@@ -68,10 +68,7 @@ export default class WaspRobot extends Enemy {
         } else if (vel.x < 0 && this.prevVelX >= 0) {
             this.turn(-1);
         }
-        console.log('[WaspRobot._chaseNearestPlayer] velocity = ' + vel.x + ',' + vel.y);
-        // TODO Create logic to turn sprite when changing direction;
-        // Store vel.x from previous frame, and turn the sprite when
-        // signal is changed
+        //console.log('[WaspRobot._chaseNearestPlayer] velocity = ' + vel.x + ',' + vel.y);
         if (player && player.sprite) {
             // Horizontal movement
             if (player.sprite.body.x < this.sprite.body.x) { // player is to the left of robot

@@ -53,9 +53,6 @@ export default class MenuScreen extends BaseScene {
      */
     constructor() {
         super('MenuScreen');        
-        this.menuOptionGlyphs = [];
-        this.containers = [];
-        this.assignedIndices = [];
     }
     
     /**
@@ -64,9 +61,13 @@ export default class MenuScreen extends BaseScene {
      */
     create(data?: any) {
         super.create(data);
+        this.menuOptionGlyphs = [];
+        this.containers = [];
+        this.assignedIndices = [];
         this.page = MenuScreen.PAGE_SELECT_NUM_PLAYERS;
         this.optionIndex = 0;
         this.transitionInProgress = false;
+        this.cameras.main.setBackgroundColor(MenuScreen.BG_COLOR);
         this.font = new SpriteFont(this);
         this.maxPlayers = this.ctrlMethods.length;
         console.log('[MenuScreen.create] this.maxPlayers = ' + this.maxPlayers);

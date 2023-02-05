@@ -66,48 +66,15 @@ export default abstract class GameSegment extends BaseScene {
     timeHud: TimeHud;
     
     constructor(config:string) {
-        super(config);
-        this.enemies = [];
-        this.powerUps = [];
-        this.prevScrollX = this.prevScrollY = -1; // uninitialized
-        this.stopping = false;
-    }
-
-    /**
-     * 
-     * @param index 0 for Player 1, 1-2-3
-     */
-    private _createNinjaSprites(): Phaser.Physics.Arcade.Sprite[] {
-      let spr: Phaser.Physics.Arcade.Sprite;
-      let arr: Phaser.Physics.Arcade.Sprite[] = [];
-      let spawn_x: number;
-      for (let i = 0; i < this.numPlayers; i++) {
-        spawn_x = GameSegment.PLAYER1_SPAWN_X + (i * GameSegment.PLAYER_SPAWN_H_SPACING);
-        console.log('[GameSegment._createNinjaSprites] adding sprite with key ninja' + i.toString());
-        spr = this.physics.add.sprite(spawn_x, GameSegment.PLAYER1_SPAWN_Y, 'ninja' + i.toString());
-        spr.setDepth(Globals.NINJA_DEPTH);
-        spr.setData('type', 'Ninja');       // type (tag with Class-Name) of parent object
-        arr.push(spr);
-      }
-      return arr;
-    }
-
-    private _createSwordSprites(): Phaser.Physics.Arcade.Sprite[] {
-      let spr: Phaser.Physics.Arcade.Sprite;
-      let arr: Phaser.Physics.Arcade.Sprite[] = [];
-      for (let i = 0; i < this.numPlayers; i++) {
-        spr = this.physics.add.sprite(0, 0, 'sword'); 
-        spr.setDepth(Globals.NINJA_DEPTH);
-        spr.setData('type', 'NinjaSword');  // type (tag with Class-Name) of parent object
-        spr.body.allowGravity = false; // will always move along with player
-        spr.setVisible(false);
-        arr.push(spr);
-      }
-      return arr;
+        super(config);        
     }
 
     create(ctx?: any) {
         super.create(ctx);
+        this.enemies = [];
+        this.powerUps = [];
+        this.prevScrollX = this.prevScrollY = -1; // uninitialized
+        this.stopping = false;
         this.numPlayers = ctx ? ctx.numPlayers : 1;
         this.assignedIndices = ctx.assignedIndices;
         const sprites = this._createNinjaSprites();
@@ -134,7 +101,7 @@ export default abstract class GameSegment extends BaseScene {
         Ninja.initAnims(this);
 
         let ctrl: ControlMethod;
-        if (!this.players) {
+        if (!this.players || this.players.length == 0) {
           this.players = [];
           for (let i = 0; i < this.numPlayers; i++) {
             let ctrl = this.ctrlMethods[this.assignedIndices[i]];
@@ -202,7 +169,7 @@ export default abstract class GameSegment extends BaseScene {
             this.playerGroup,
             (_1, _2) =>
             {
-              console.log('enemy and ninja collided');
+              //console.log('enemy and ninja collided');
               let ninja, enemy;
               if (_1.getData("type") == 'Ninja') {
                 ninja = _1.getData("parent");
@@ -236,8 +203,8 @@ export default abstract class GameSegment extends BaseScene {
           }
         );
 
-        this.start();
         this.stopping = false;
+        this.start();        
     }
 
    /**
@@ -492,6 +459,39 @@ export default abstract class GameSegment extends BaseScene {
           this.fpsHud.update();
         }
         
+    }
+
+    /**
+     * 
+     * @param index 0 for Player 1, 1-2-3
+     */
+    private _createNinjaSprites(): Phaser.Physics.Arcade.Sprite[] {
+      let spr: Phaser.Physics.Arcade.Sprite;
+      let arr: Phaser.Physics.Arcade.Sprite[] = [];
+      let spawn_x: number;
+      for (let i = 0; i < this.numPlayers; i++) {
+        spawn_x = GameSegment.PLAYER1_SPAWN_X + (i * GameSegment.PLAYER_SPAWN_H_SPACING);
+        console.log('[GameSegment._createNinjaSprites] adding sprite with key ninja' + i.toString());
+        spr = this.physics.add.sprite(spawn_x, GameSegment.PLAYER1_SPAWN_Y, 'ninja' + i.toString());
+        spr.setDepth(Globals.NINJA_DEPTH);
+        spr.setData('type', 'Ninja');       // type (tag with Class-Name) of parent object
+        arr.push(spr);
+      }
+      return arr;
+    }
+
+    private _createSwordSprites(): Phaser.Physics.Arcade.Sprite[] {
+      let spr: Phaser.Physics.Arcade.Sprite;
+      let arr: Phaser.Physics.Arcade.Sprite[] = [];
+      for (let i = 0; i < this.numPlayers; i++) {
+        spr = this.physics.add.sprite(0, 0, 'sword'); 
+        spr.setDepth(Globals.NINJA_DEPTH);
+        spr.setData('type', 'NinjaSword');  // type (tag with Class-Name) of parent object
+        spr.body.allowGravity = false; // will always move along with player
+        spr.setVisible(false);
+        arr.push(spr);
+      }
+      return arr;
     }
 
     private _placePowerUps() {

@@ -54,9 +54,7 @@ export default class Scene21Desert extends GameSegment {
 
     constructor() {
         console.log('[constructor@Scene21Desert] BEGIN');
-        super('Scene21Desert');
-        this.initialTimerValue = this.TIME_TO_BEAT;
-        this.quicksandPuddles = [];
+        super('Scene21Desert');        
         // TODO Have a reset() method for variables that reset at every level 
         // restart (like the ones above); and do it there
         console.log('[constructor@Scene21Desert] END');
@@ -65,6 +63,8 @@ export default class Scene21Desert extends GameSegment {
     create(ctx?: any) {
         console.log('[Scene21Desert.create] BEGIN');
         super.create(ctx);
+        this.initialTimerValue = this.TIME_TO_BEAT;
+        this.quicksandPuddles = [];
         this.cloudLayer = this.add.tileSprite(0, 0, this.LEVEL_WIDTH, 90, 'clouds');
         this.mountainLayer = this.add.tileSprite(0, 18, this.LEVEL_WIDTH, 90, 'mountains');
         this.bgRuins = this.add.tileSprite(0, 72, this.LEVEL_WIDTH, 36, 'bgruins');
