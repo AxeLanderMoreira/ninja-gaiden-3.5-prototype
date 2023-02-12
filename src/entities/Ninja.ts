@@ -127,6 +127,8 @@ export default class Ninja extends Entity {
         this.sword = sword;
         sprite.setData('parent', this);
         sword.setData('parent', this);                
+        // TODO Line below will not needed once I figure out best way to 
+        // implement setCustomHitbox
         sprite.setSize(20, 36);
         this.state = "stand_idle";        
         this.powerUp = false; //true; 
@@ -169,12 +171,14 @@ export default class Ninja extends Entity {
         const ninjaBody : Phaser.Physics.Arcade.Body = this.sprite.body;   
         switch(newState) {
             case "climb_idle":
+                //this.setCustomHitbox(new Phaser.Geom.Rectangle(17,5,13,30));
                 this.jumping = false;
                 ninjaBody.allowGravity = false;
                 this.sprite.setVelocity(0, 0);
                 // move outside of colliding body
                 break;
             case "crouch_idle":
+                //this.setCustomHitbox(new Phaser.Geom.Rectangle(10,12,15,24));
                 this.jumping = false;
                 this.sprite.setVelocity(0, 0);
                 this.sprite.setAcceleration(0);
@@ -208,6 +212,7 @@ export default class Ninja extends Entity {
                 this.jumping = false;
                 break;
             case "jump_descend":
+                //this.setCustomHitbox(new Phaser.Geom.Rectangle(11,6,14,28));
                 this.jumping = true;
                 ninjaBody.allowGravity = true;
                 this.ledgeTopOut = this.ledgeTop; // mark the ledge where I jumped from
@@ -230,6 +235,7 @@ export default class Ninja extends Entity {
                 this.ledgeTop = undefined; // no longer bound to a ledge                
                 break;
             case "jump_sommersault":
+                //this.setCustomHitbox(new Phaser.Geom.Rectangle(9,11,16,16));
                 this.jumping = true;
                 ninjaBody.allowGravity = true;
                 if (prevState == 'climb_idle' || prevState == 'climb_move') {
@@ -242,6 +248,7 @@ export default class Ninja extends Entity {
                 this.ledgeTop = undefined; // no longer bound to a ledge                
                 break;
             case "stand_idle":
+                //this.setCustomHitbox(new Phaser.Geom.Rectangle(11,4,15,32));
                 this.jumping = false;
                 this.sprite.setVelocity(0);
                 this.sprite.setAcceleration(0);
@@ -347,6 +354,25 @@ export default class Ninja extends Entity {
 
     /**
      * 
+     * @param dmg 
+     */
+    gotHitBySpike(spike: Phaser.Types.Physics.Arcade.GameObjectWithBody, dmg: integer) {
+        console.log('[Ninja.gotHitBySpike] IN');
+        if (this.hp > 0) {
+            this.hp -= dmg;
+        }
+        console.log('[Ninja.gotHitBySpike] this.hp = ' + this.hp);
+        if (this.hp > 0) {
+            this.sprite.setVelocity(-this.facing * Ninja.WALKING_SPEED,-50);
+            this.setState('get_hit');
+        } else {
+            this.loseLife();
+        }
+        console.log('[Ninja.gotHitBySpike] OUT');
+    }
+
+    /**
+     * 
      */
     gotHit(other: Entity) : boolean {
         super.gotHit(other);
@@ -420,7 +446,7 @@ export default class Ninja extends Entity {
             let ny2 = Ninja.rect1.y + Ninja.rect1.height;
             let ly1 = Ninja.rect2.y;
             let ly2 = Ninja.rect2.y + Ninja.rect2.height;
-            console.log("[Ninja.onTouchedLedge]  ledge == this.ledgeBottomOut");
+            //console.log("[Ninja.onTouchedLedge]  ledge == this.ledgeBottomOut");
             if (ledge != this.ledgeBottomOut && ny1 >= ly1 && ny1 <= ly2) {
                 //console.log('[Ninja.onTouchedLedge] GRAB BOTTOM OF LEDGE');
                 this.setState('grab_idle');
@@ -429,7 +455,7 @@ export default class Ninja extends Entity {
                 //this.sprite.body.y = 
                 // TODO Force position of the hands to ly1 + (Ninja.rect2.height / 2);
             } else if (ledge != this.ledgeTopOut && ny2 >= ly1 && ny2 <= ly2) { // not the ledge I jumped from
-                console.log('[Ninja.onTouchedLedge] WALK ON TOP OF LEDGE');
+                //console.log('[Ninja.onTouchedLedge] WALK ON TOP OF LEDGE');
                 // TODO Have ledgeTop, ledgeBottom, ledgeOut?
                 this.ledgeTop = ledge;
                 this.ledgeTopOut = undefined;
@@ -504,28 +530,6 @@ Características de quando cai na areia movediça:
         this.sword.setVisible(false);
         this.sword.anims.stop();
     }
-
-/*
-setCustomHitbox(rect: Phaser.Geom.Rectangle) {
-        this.customHitbox = rect;
-        this.sprite.body.setSize(rect.width, rect.height);
-        this._recalculateOffset();
-    }
-
-private _recalculateOffset() {
-        if (this.customHitbox != undefined) {
-            if (this.facing > 0) { // facing right
-                this.sprite.body.offset.x = this.customHitbox.x;                
-            } else if (this.facing < 0) { // facing left
-                this.sprite.body.offset.x = this.sprite.width - (this.customHitbox.x + this.customHitbox.width);
-            }
-            this.sprite.body.offset.y = this.customHitbox.y;
-            // TODO In order to make it more generic, we'd have to take into
-            // account flipY as well. Anyway, it seems fine for the platformer
-            // we're doing at the moment.         
-        }
-    }
-*/
 
     updateSwordSprite(ninjaBody : Phaser.Physics.Arcade.Body, swordBody : Phaser.Physics.Arcade.Body) {
         const offset_x = this.slash_offset[this.state].x;
@@ -665,8 +669,8 @@ private _recalculateOffset() {
                 this._testSwordHit();
                 break;
             case 'get_hit':
-                console.log('[Ninja.update(get_hit)] this.getStateTime() = ' + this.getStateTime());
-                console.log('[Ninja.update(get_hit)] sprite.body.velocity.y now = ' + this.sprite.body.velocity.y);
+                //console.log('[Ninja.update(get_hit)] this.getStateTime() = ' + this.getStateTime());
+                //console.log('[Ninja.update(get_hit)] sprite.body.velocity.y now = ' + this.sprite.body.velocity.y);
                 if (this.getStateTime() > 0 && ninjaBody.velocity.y >= 0 && this.onFloor()) { // descent
                     this.setState('stand_idle'); 
                     this.setTimedInvincibility();                    

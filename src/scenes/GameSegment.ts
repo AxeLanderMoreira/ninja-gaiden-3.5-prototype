@@ -20,6 +20,7 @@ import TimeHud from "../menus/TimeHud";
 import ChopperClaw from "../entities/ChopperClaw";
 import Enemy from "../entities/Enemy";
 import WaspRobot from "../entities/WaspRobot";
+import WaveFloater from "../entities/WaveFloater";
 
 /**
  * Contains all logic common to every Scene in this Game.
@@ -90,6 +91,7 @@ export default abstract class GameSegment extends BaseScene {
         EnemyAlien.initAnims(this);
         EnemySoldier.initAnims(this);
         WaspRobot.initAnims(this);
+        WaveFloater.initAnims(this);
 
         /*************************************************************************\
          * EXPLOSION ANIMS
@@ -151,6 +153,7 @@ export default abstract class GameSegment extends BaseScene {
                   }
                   break;
                 case 'Ledge':
+                case 'Spike':
                   //  no effect here
                   break;
                }
@@ -163,6 +166,11 @@ export default abstract class GameSegment extends BaseScene {
                 case 'Ledge':
                   ninja.onTouchedLedge(_platform);
                   return (!!ninja.ledgeTop);
+                case 'Spike':
+                  if (!ninja.invincible) {
+                    ninja.gotHitBySpike(_platform, 6);  // attention to invincibility?
+                  }                  
+                  return false;
               }
         });
 
@@ -224,7 +232,7 @@ export default abstract class GameSegment extends BaseScene {
           animKey += variant;
         }
         animKey += '.' + animName;
-        console.log('[GameSegment.createAnim] objName = ' + objName + ', animKey ' + animKey);
+        //console.log('[GameSegment.createAnim] objName = ' + objName + ', animKey ' + animKey);
         this.anims.create({
           key: animKey,
           frames: this.anims.generateFrameNumbers(objName, framesObj),
@@ -348,6 +356,7 @@ export default abstract class GameSegment extends BaseScene {
         Explod.preloadResources(this);
         Ninja.preloadResources(this);
         PowerUp.preloadResources(this);
+        WaveFloater.preloadResources(this);
         WaspRobot.preloadResources(this);
       }
 
@@ -415,8 +424,10 @@ export default abstract class GameSegment extends BaseScene {
           player.update();
           if (player.getHp() > 0) {
             numAlive++;
-            avg_x += player.sprite.body.x;
-            avg_y += player.sprite.body.y;
+            /*avg_x += player.sprite.body.x;
+            avg_y += player.sprite.body.y;*/
+            avg_x += player.sprite.x;
+            avg_y += player.sprite.y;
           }          
         });
         // Move camera focal point, and try do it smoothly - fixes abrupt

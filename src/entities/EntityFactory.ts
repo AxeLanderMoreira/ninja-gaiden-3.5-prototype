@@ -12,6 +12,7 @@ import EnemySoldier from "./EnemySoldier";
 import Entity from "./Entity";
 import PowerUp from "./PowerUp";
 import WaspRobot from "./WaspRobot";
+import WaveFloater from "./WaveFloater";
 
 /**
  * Creates Entities (enemies, traps) from an object (or array of objects) taken
@@ -80,11 +81,23 @@ export default class EntityFactory {
     }
 
     private static createWaspRobot(obj: any): Entity {
+        
         let sprite = EntityFactory.scene.enemyGroup.create(0, 0, 'wasp_robot');
-        sprite.setDepth(Globals.ENEMY_DEPTH);
+        sprite.setDepth(Globals.ENEMY_DEPTH);        
         let ret: WaspRobot = new WaspRobot(EntityFactory.scene, sprite);
         sprite.setData('type', 'WaspRobot');
         sprite.setData('parent', ret);
+        return ret;
+    }
+
+    private static createWaveFloater(obj: any): Entity {
+        console.log('[EntityFactory.createWaveFloater] IN');
+        let sprite = EntityFactory.scene.enemyGroup.create(0, 0, 'wave_floater');
+        sprite.setDepth(Globals.ENEMY_DEPTH);
+        let ret: WaveFloater = new WaveFloater(EntityFactory.scene, sprite);
+        sprite.setData('type', 'WaveFloater');
+        sprite.setData('parent', ret);
+        console.log('[EntityFactory.createWaveFloater] OUT');
         return ret;
     }
 
@@ -98,6 +111,7 @@ export default class EntityFactory {
             case 'EnemySoldier': ret = EntityFactory.createEnemySoldier(obj); break;
             case 'PowerUp': ret = EntityFactory.createPowerUp(obj); break;          
             case 'WaspRobot': ret = EntityFactory.createWaspRobot(obj); break;  
+            case 'WaveFloater': ret = EntityFactory.createWaveFloater(obj); break;  
             default: break;                
         }
         if (ret) {
