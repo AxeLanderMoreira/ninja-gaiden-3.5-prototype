@@ -3,9 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import ArmoredTurret from "../entities/ArmoredTurret";
 import BaseScene from "./BaseScene";
+import ChopperClaw from "../entities/ChopperClaw";
 import ControlMethod from "../input/ControlMethod";
 import DroidBall from "../entities/DroidBall";
+import Enemy from "../entities/Enemy";
 import EnemyAlien from "../entities/EnemyAlien";
 import EnemySoldier from "../entities/EnemySoldier";
 import Entity from "../entities/Entity";
@@ -17,8 +20,6 @@ import Ninja from "../entities/Ninja";
 import PlayerHud from "../menus/PlayerHud";
 import PowerUp from "../entities/PowerUp";
 import TimeHud from "../menus/TimeHud";
-import ChopperClaw from "../entities/ChopperClaw";
-import Enemy from "../entities/Enemy";
 import WaspRobot from "../entities/WaspRobot";
 import WaveFloater from "../entities/WaveFloater";
 
@@ -86,6 +87,7 @@ export default abstract class GameSegment extends BaseScene {
         /*************************************************************************\
          * ENEMY ANIMS
         \*************************************************************************/
+        ArmoredTurret.initAnims(this);
         ChopperClaw.initAnims(this);
         DroidBall.initAnims(this);
         EnemyAlien.initAnims(this);
@@ -349,6 +351,7 @@ export default abstract class GameSegment extends BaseScene {
     preload() {
         super.preload();   
         // Move these calls and .initAnim() calls to EntityFactory?
+        ArmoredTurret.preloadResources(this);
         ChopperClaw.preloadResources(this);
         DroidBall.preloadResources(this);
         EnemyAlien.preloadResources(this);
@@ -407,6 +410,7 @@ export default abstract class GameSegment extends BaseScene {
         this.enemies.forEach(enemy => {
           if (!enemy.hovering) {
             this.physics.collide(enemy.sprite, this.getMapPlatformLayer());
+            this.physics.collide(enemy.sprite, this.platformGroup);
           }
         });
         this.physics.collide(this.powerUpGroup, this.getMapPlatformLayer());
@@ -499,7 +503,7 @@ export default abstract class GameSegment extends BaseScene {
       let arr: Phaser.Physics.Arcade.Sprite[] = [];
       for (let i = 0; i < this.numPlayers; i++) {
         spr = this.physics.add.sprite(0, 0, 'sword'); 
-        spr.setDepth(Globals.NINJA_DEPTH);
+        spr.setDepth(Globals.ENEMY_DEPTH+1);
         spr.setData('type', 'NinjaSword');  // type (tag with Class-Name) of parent object
         spr.body.allowGravity = false; // will always move along with player
         spr.setVisible(false);

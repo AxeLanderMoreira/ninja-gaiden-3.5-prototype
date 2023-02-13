@@ -46,7 +46,7 @@ export default class WaveFloater extends Enemy {
 
     /**
      * Will 'lock-on' to the y position of the nearest player, and keep moving 
-     * on the same constant x speed and diretion until reach the edge of the 
+     * on the same constant x speed and direction until reach the edge of the 
      * screen.
      */
     private _lockOnNearestPlayer() {

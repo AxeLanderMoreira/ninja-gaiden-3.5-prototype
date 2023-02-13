@@ -23,7 +23,6 @@ export default class DroidBall extends Enemy {
     player?: Phaser.Physics.Arcade.Sprite;
     xspeed: number;
 
-
     static initAnims (scene: GameSegment) {        
         scene.createAnim('droid_ball', 0, 'wait', {frames: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]}, 2000, -1);
         scene.createAnim('droid_ball', 0, 'bounce', {start: 2, end: 5}, 400, -1);        
@@ -33,7 +32,7 @@ export default class DroidBall extends Enemy {
         scene.load.spritesheet('droid_ball', 'assets/DroidBall.png', {
             frameWidth: 16,
             frameHeight: 16
-        })
+        });
     }
   
     constructor(scene: GameSegment, sprite: Phaser.Physics.Arcade.Sprite, variant?: integer) {

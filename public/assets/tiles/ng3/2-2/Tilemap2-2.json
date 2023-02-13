@@ -87,6 +87,18 @@
                  "width":32,
                  "x":608,
                  "y":112
+                }, 
+                {
+                 "class":"",
+                 "gid":99,
+                 "height":32,
+                 "id":17,
+                 "name":"ArmoredTurret",
+                 "rotation":0,
+                 "visible":true,
+                 "width":32,
+                 "x":320,
+                 "y":80
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -219,7 +231,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":17,
+ "nextobjectid":18,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",

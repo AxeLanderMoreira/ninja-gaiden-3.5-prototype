@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="48" height="14" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#000000" nextlayerid="6" nextobjectid="17">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="48" height="14" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#000000" nextlayerid="6" nextobjectid="18">
  <editorsettings>
   <export target="Tilemap2-2.json" format="json"/>
  </editorsettings>
@@ -55,6 +55,7 @@
    </properties>
   </object>
   <object id="16" name="WaveFloater" gid="98" x="608" y="112" width="32" height="32"/>
+  <object id="17" name="ArmoredTurret" gid="99" x="320" y="80" width="32" height="32"/>
  </objectgroup>
  <objectgroup id="3" name="Walls">
   <object id="1" name="Wall" x="48.5" y="146" width="9.25" height="75.1667"/>

@@ -16,6 +16,16 @@ export default abstract class Enemy extends Entity {
         this.turn(-1); // TODO Get reverse of current Level's forward direction
     }
 
+    destroy() {
+        this.sprite.disableBody(true, true);
+        let idx = this.scene.enemies.indexOf(this);
+        if (idx >= 0) {
+            this.scene.enemies.splice(idx, 1);
+        }
+        this.scene.enemyGroup.remove(this.sprite);
+        super.destroy();
+    }
+
     getAttackStrength(): integer {
         return 3; // higher damage for testing game over easily
     }
@@ -42,10 +52,11 @@ export default abstract class Enemy extends Entity {
     gotHit(other: Entity): boolean {
         super.gotHit(other);
         if (this.hp <= 0) {
-            new Explod(this).spawn(); // Explod.spawn() is not related to Entity.spawn() (different signatures)
-            this.sprite.disableBody(true, true);
+            new Explod(this).spawn(); // Explod.spawn() is not related to Entity.spawn() (different signatures)            
+            this.destroy();
             return true;
         }
+        return false;
     }
 
     spawn(group: Phaser.Physics.Arcade.Group) {

@@ -13,6 +13,7 @@ import Entity from "./Entity";
 import PowerUp from "./PowerUp";
 import WaspRobot from "./WaspRobot";
 import WaveFloater from "./WaveFloater";
+import ArmoredTurret from "./ArmoredTurret";
 
 /**
  * Creates Entities (enemies, traps) from an object (or array of objects) taken
@@ -25,6 +26,14 @@ export default class EntityFactory {
     /*************************************************************************\
      * SPECIFIC FACTORY METHODS FOR EACH ENTITY
     \*************************************************************************/
+    private static createArmoredTurret(obj: any): Entity {
+        let sprite = EntityFactory.scene.enemyGroup.create(0, 0, 'armored_turret');
+        sprite.setDepth(Globals.ENEMY_DEPTH);
+        let ret: ArmoredTurret = new ArmoredTurret(EntityFactory.scene, sprite);
+        sprite.setData('type', 'ArmoredTurret');
+        sprite.setData('parent', ret);
+        return ret;    }
+
     private static createChopperClaw(obj: any): Entity {
         let sprite = EntityFactory.scene.enemyGroup.create(0, 0, 'chopper_claw');
         sprite.setDepth(Globals.ENEMY_DEPTH);
@@ -105,6 +114,7 @@ export default class EntityFactory {
         let ret: Entity;
         console.log('[makeOne@EntityFactory] obj.name = ' + obj.name);
         switch(obj.name) {
+            case 'ArmoredTurret': ret = EntityFactory.createArmoredTurret(obj); break;
             case 'ChopperClaw': ret = EntityFactory.createChopperClaw(obj); break;
             case 'DroidBall': ret = EntityFactory.createDroidBall(obj); break;
             case 'EnemyAlien': ret = EntityFactory.createEnemyAlien(obj); break;
@@ -118,7 +128,7 @@ export default class EntityFactory {
             EntityFactory.scene.placeEntity(ret, obj.x, obj.y);
         }
         return ret;
-    }    
+    }
 
     public static makeMany(objs: any[]): Entity[] {
         let ret: Entity[] = [];
