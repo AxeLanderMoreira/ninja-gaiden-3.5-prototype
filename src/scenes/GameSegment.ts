@@ -22,18 +22,20 @@ import PowerUp from "../entities/PowerUp";
 import TimeHud from "../menus/TimeHud";
 import WaspRobot from "../entities/WaspRobot";
 import WaveFloater from "../entities/WaveFloater";
+import BlobSpikeBall from "../entities/BlobSpikeBall";
+import { Acts } from "./Acts";
 
 /**
  * Contains all logic common to every Scene in this Game.
  */
 export default abstract class GameSegment extends BaseScene {
     
-    readonly ENEMY_SPAWN_MARGIN = 32; /**< amount of pixels extrapolating the 
+    readonly ENEMY_SPAWN_MARGIN = 0; /**< amount of pixels extrapolating the 
     camera's visible area, on each of the four sides. When that extrapolated
     rectangle overlaps with the rectangle of an enemy placed in the map, the
     corresponding enemy will then be spawned into the game. */
     // TODO These spawn positions should actually vary depending on each level
-    static readonly PLAYER_SPAWN_H_SPACING = 32; /** Horizontal spacing between each Player's spawn area */
+    static readonly PLAYER_SPAWN_H_SPACING = Ninja.BODY_WIDTH; /** Horizontal spacing between each Player's spawn area */
     static readonly PLAYER1_SPAWN_X = 64; /**< X-Position where to spawn Ninja Player 1 */
     static readonly PLAYER1_SPAWN_Y = -32;
     // Camera maximum movement in all directions, in pixels, between frames
@@ -68,6 +70,7 @@ export default abstract class GameSegment extends BaseScene {
     stopping: boolean;
     t0: number;
     timeHud: TimeHud;
+    gameClock: Phaser.Time.TimerEvent;
     
     constructor(config:string) {
         super(config);        
@@ -88,6 +91,7 @@ export default abstract class GameSegment extends BaseScene {
          * ENEMY ANIMS
         \*************************************************************************/
         ArmoredTurret.initAnims(this);
+        BlobSpikeBall.initAnims(this);
         ChopperClaw.initAnims(this);
         DroidBall.initAnims(this);
         EnemyAlien.initAnims(this);
@@ -107,6 +111,9 @@ export default abstract class GameSegment extends BaseScene {
         Ninja.initAnims(this);
 
         let ctrl: ControlMethod;
+        if (ctx.players) { // Ninja instances transferred from previous level
+          this.players = ctx.players;
+        }
         if (!this.players || this.players.length == 0) {
           this.players = [];
           for (let i = 0; i < this.numPlayers; i++) {
@@ -115,10 +122,12 @@ export default abstract class GameSegment extends BaseScene {
           }
         } else {
           this.players.forEach((player, i) => {
-            player.respawn(sprites[i], swords[i]);
+            player.scene = this;
+            player.respawn(sprites[i], swords[i], ctx.keepStats);            
           })
         }
 
+        //this.paused = false;
         this.playerGroup = this.physics.add.group();
         this.players.forEach((player, i) => {
           this.playerGroup.add(player.sprite);
@@ -133,7 +142,8 @@ export default abstract class GameSegment extends BaseScene {
         this.playerHuds = [];
         this.players.forEach((p, i) => {
           this.playerHuds.push(new PlayerHud(this, p, i));
-        })
+        });
+
         this.timeHud = new TimeHud(this);
         if (Globals.DEBUG_FPS) {
           this.fpsHud = new FpsHud(this);
@@ -143,8 +153,15 @@ export default abstract class GameSegment extends BaseScene {
             this.playerGroup,
             this.platformGroup,
             (_sprite, _platform) => { /* collideCalback */
-               let ninja = _sprite.getData('parent');
+               let ninja: Ninja = _sprite.getData('parent');
                switch (_platform.name) {
+                case 'Exit':
+                  break;
+                case 'Ledge':
+                  break;
+                case 'Spike':
+                  //  no effect here
+                  break;
                 case 'Wall': 
                   if (_sprite.body.touching.right && _platform.body.touching.left)
                   {
@@ -154,17 +171,14 @@ export default abstract class GameSegment extends BaseScene {
                       ninja.onTouchedWall(_platform, -1);
                   }
                   break;
-                case 'Ledge':
-                case 'Spike':
-                  //  no effect here
-                  break;
                }
             },
             (_sprite, _platform) => { /* processCallback */
             let ninja = _sprite.getData('parent');
               switch (_platform.name) {
-                case 'Wall': 
-                  return true;
+                case 'Exit':
+                  ninja.onTouchedExit(_platform);
+                  return false; // ??
                 case 'Ledge':
                   ninja.onTouchedLedge(_platform);
                   return (!!ninja.ledgeTop);
@@ -173,6 +187,8 @@ export default abstract class GameSegment extends BaseScene {
                     ninja.gotHitBySpike(_platform, 6);  // attention to invincibility?
                   }                  
                   return false;
+                case 'Wall': 
+                  return true;
               }
         });
 
@@ -216,6 +232,23 @@ export default abstract class GameSegment extends BaseScene {
         );
 
         this.stopping = false;
+        if (ctx.currTimerValue) {
+          // If in transition from one segment to the other, get initial timer
+          // value from previous segment
+          this.initialTimerValue = ctx.currTimerValue;
+        } else {
+          // Otherwise (if respawned or in the Act's first level, get from the Acts config)
+          this.initialTimerValue = Acts.getTimeLimit();
+        }
+
+        this.events.on(Phaser.Scenes.Events.RESUME, ctx => {
+          this.gameClock.paused = false;
+          this.ctrlMethods.forEach(ctrl => {
+            console.log('[BaseScene.create] ctrl.resetScene() for ' + this.constructor.name)
+            ctrl.resetScene(this);
+          });
+        })
+
         this.start();        
     }
 
@@ -247,8 +280,11 @@ export default abstract class GameSegment extends BaseScene {
      * Adds Walls to this level, taken from an ObjectLayer parsed from json
      * file generated in Teiled tool.
      * 
-     * It actually builds not only Walls, but Ledges and any other kind of 
-     * platform that has non-trivial, semi-solid properties.
+     * It actually builds not only Walls, but:
+     * - Ledges 
+     * - Exits 
+     * and any other kind of platform that has non-trivial properties (such as:
+     * being semi-solid, reacting to overlap in a unique way etc)
      * 
      * @param layer The source layer
      */
@@ -258,8 +294,19 @@ export default abstract class GameSegment extends BaseScene {
           let wall = this.add.rectangle(o.x, o.y, o.width, o.height, 0x000000, 0);
           wall.name = o.name; // may be 'Wall', 'Ledge', etc.
           wall.setOrigin(0, 0);
+          if (o.properties) {
+            o.properties.forEach((prop) => {
+              wall.setData(prop.name, prop.value);
+            })
+          }
           this.platformGroup.add(wall);
       });
+    }
+
+
+    getElapsedTime(): number {
+      if (!this.gameClock) return 0;
+      return this.gameClock.elapsed;
     }
 
     /**
@@ -270,7 +317,7 @@ export default abstract class GameSegment extends BaseScene {
     /**
      * If the level has lower bounds where the player or an enemy can fall 
      * through, this function has to be overwritten.
-     * @returns 0 if the level doesn't have lower bounds, or a poitive integer
+     * @returns 0 if the level doesn't have lower bounds, or a positive integer
      * with the lower bounds y-coordinate.
      */
     getLowerBounds(): integer {
@@ -286,7 +333,8 @@ export default abstract class GameSegment extends BaseScene {
      * Gets remaining time in TIME countdown for this game segment, in milisseconds
      */
     getRemainingTime(): number {
-      let delta = this.time.now - this.t0;
+      if (!this.gameClock) return this.initialTimerValue;
+      let delta = this.gameClock.elapsed;
       this.currTimerValue = Math.floor(this.initialTimerValue - delta);
       return this.currTimerValue;
     }
@@ -333,6 +381,7 @@ export default abstract class GameSegment extends BaseScene {
   
     private _restartLevel() {
         this.stop();
+        this.initialTimerValue = Acts.getTimeLimit(); // reset
         this.cameras.main.fadeOut(500, 0, 0, 0, (_camera, _progress) => {
         if (_progress >= 1) {
           this.scene.restart({numPlayers: this.numPlayers});
@@ -340,18 +389,11 @@ export default abstract class GameSegment extends BaseScene {
       });
     }
 
-    
-
-    placeEntity(entity: Entity, x: any, y: any) {
-      let _x = x + entity.sprite.width / 2;
-      let _y = y - entity.sprite.height / 2;// + this.sprite.height;
-      entity.sprite.setPosition(_x, _y);        
-    }
-
     preload() {
         super.preload();   
         // Move these calls and .initAnim() calls to EntityFactory?
         ArmoredTurret.preloadResources(this);
+        BlobSpikeBall.preloadResources(this);
         ChopperClaw.preloadResources(this);
         DroidBall.preloadResources(this);
         EnemyAlien.preloadResources(this);
@@ -391,21 +433,36 @@ export default abstract class GameSegment extends BaseScene {
      * 
      */
     start() {
-      this.t0 = this.time.now;
+      this.gameClock = this.time.addEvent({delay: 999999});
+      // Scene.time and Clock objects seemingly ignore the 'paused' property,
+      // so we have to resort to a TimerEvent.
+      // Reference: https://phaser.discourse.group/t/scene-time-paused-does-not-work/6734
       this.currTimerValue = this.initialTimerValue;
     }
-
-    // TODO Implement pause
 
     update(time: number, delta: number): void {  
         super.update(time, delta);
         if (this.stopping) {
           return;
         }
+
+        // Time limit
+        if (this.getRemainingTime() <= 0) {
+          console.log('[GameSegment.update] TIME LIMIT REACHED');
+          this.players.forEach((player) => {
+            if (player.hp > 0) {
+              player.loseLife();
+            }
+          });
+        }
+
         // Pass control method on player creation
         this.ctrlMethods.forEach(method => {
           method.update();
-        });        
+        });
+        if (this.anyInputHit('start')) {
+          this.togglePause();
+        }
         let cam = this.cameras.main;
         this.enemies.forEach(enemy => {
           if (!enemy.hovering) {
@@ -461,14 +518,18 @@ export default abstract class GameSegment extends BaseScene {
           this.camFocusPoint.x = new_cam_x;
           this.camFocusPoint.y = new_cam_y;
         }
-        this._spawnEnemies();
-        this.enemies.forEach((enemy) => {
-          enemy.update();
-        });
-        this._placePowerUps();
-        this.powerUps.forEach(p => {
-          p.update();
-        })
+        if (!Globals.DEBUG_NO_ENEMIES) {
+          this._spawnEnemies();
+          this.enemies.forEach((enemy) => {
+            enemy.update();
+          });
+        }
+        if (!Globals.DEBUG_NO_POWERUPS) {
+          this._placePowerUps();
+          this.powerUps.forEach(p => {
+            p.update();
+          })
+        }
         this.playerHuds.forEach((hud) => {
           hud.update();
         });
@@ -478,6 +539,26 @@ export default abstract class GameSegment extends BaseScene {
         }
         
     }
+  togglePause() {
+      this.gameClock.paused = true;
+      this.scene.pause();
+      this.scene.launch('PauseScreen', {
+        ctrlMethods: this.ctrlMethods,
+        pausedScene: this
+      });
+  }
+
+
+    /**
+     * Overwrite this in GameSegment subclass to redefine the spawn position 
+     * accordingly.
+     * @param i index of the i-th player, beginning with 0.
+     */
+    getPlayerSpawnPosition(i: integer): Phaser.Math.Vector2 {
+      let _x = GameSegment.PLAYER1_SPAWN_X + (i * GameSegment.PLAYER_SPAWN_H_SPACING);
+      let _y = GameSegment.PLAYER1_SPAWN_Y;      
+      return new Phaser.Math.Vector2(_x, _y);
+    }
 
     /**
      * 
@@ -486,11 +567,12 @@ export default abstract class GameSegment extends BaseScene {
     private _createNinjaSprites(): Phaser.Physics.Arcade.Sprite[] {
       let spr: Phaser.Physics.Arcade.Sprite;
       let arr: Phaser.Physics.Arcade.Sprite[] = [];
-      let spawn_x: number;
+      //let spawn_x: number;
+      let _v: Phaser.Math.Vector2;
       for (let i = 0; i < this.numPlayers; i++) {
-        spawn_x = GameSegment.PLAYER1_SPAWN_X + (i * GameSegment.PLAYER_SPAWN_H_SPACING);
+        _v = this.getPlayerSpawnPosition(i);
         console.log('[GameSegment._createNinjaSprites] adding sprite with key ninja' + i.toString());
-        spr = this.physics.add.sprite(spawn_x, GameSegment.PLAYER1_SPAWN_Y, 'ninja' + i.toString());
+        spr = this.physics.add.sprite(_v.x, _v.y, 'ninja' + i.toString());
         spr.setDepth(Globals.NINJA_DEPTH);
         spr.setData('type', 'Ninja');       // type (tag with Class-Name) of parent object
         arr.push(spr);
@@ -563,7 +645,7 @@ export default abstract class GameSegment extends BaseScene {
           entity = EntityFactory.makeOne(o);
           if (entity) {
             objs.splice(i, 1);
-            console.log("objs' length now = " + objs.length);
+            //console.log("objs' length now = " + objs.length);
             this.powerUps.push(entity);  
           }
         }
@@ -583,44 +665,90 @@ export default abstract class GameSegment extends BaseScene {
       let camRect: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle(
         this.cameras.main.scrollX - this.ENEMY_SPAWN_MARGIN, 
         this.cameras.main.scrollY - this.ENEMY_SPAWN_MARGIN, 
-        Globals.SCREEN_WIDTH, 
-        Globals.SCREEN_HEIGHT);
+        Globals.SCREEN_WIDTH + (this.ENEMY_SPAWN_MARGIN * 2), 
+        Globals.SCREEN_HEIGHT+ (this.ENEMY_SPAWN_MARGIN * 2));
+      let playerRects: Phaser.Geom.Rectangle[] = [];
+      this.players.forEach(p => {
+        let rect : Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
+        Phaser.Display.Bounds.GetBounds(p.sprite, rect);
+        playerRects.push(rect);
+      })
       let objRect: Phaser.Geom.Rectangle;
       let entity: Entity;
-      objs.forEach((o, i) => {
-        let spawnOffsetX = 0;
-        let spawnOffsetY = 0;
+      // TODO Handle spawnBox
+      objs.forEach((o, io) => {
         if (o.properties) {
-          o.properties.forEach((prop) => {
-            if (prop.name == "spawnOffsetX") {
-              spawnOffsetX = prop.value;
+          o.properties.forEach((prop, /*iprop*/) => {
+            if (prop.name == "spawnBox" && !o.spawnBox) { // if spawnBox was not already processed
+              this._setEnemySpawnBox(objs, io, prop.value);
+              //o.properties.splice(iprop, 1);
             }
-            if (prop.name == "spawnOffsetY") {
-              spawnOffsetY = prop.value;
-            }
-          })
+          });          
         }
 
         objRect = new Phaser.Geom.Rectangle(
-          o.x + spawnOffsetX,
+          o.x,
           o.y - o.height,
           o.width,
           o.height
         );
 
-        if (Phaser.Geom.Rectangle.Overlaps(camRect, objRect)) {          
-          entity = EntityFactory.makeOne(o); // will call place Entity
-          if (o.flippedHorizontal) {
-            entity.turn(1);
-            console.log("entity turned horizontally here");
+        if (!o.spawnBox) {
+          if (Phaser.Geom.Rectangle.Overlaps(camRect, objRect)) { 
+            console.log('[GameSegment._spawnEnemies] ' + o.name + ' to be spawned via cam bounds');         
+            entity = EntityFactory.makeOne(o); // will call place Entity
+            if (o.flippedHorizontal) {
+              entity.turn(1);
+              console.log("entity turned horizontally here");
+            }
+            if (entity) {
+              objs.splice(io, 1);
+              console.log("objs' length now = " + objs.length);
+              this.enemies.push(entity);
+            }
           }
-          if (entity) {
-            objs.splice(i, 1);
-            console.log("objs' length now = " + objs.length);
-            this.enemies.push(entity);
-          }
+        } else {
+          playerRects.forEach(pRect => {
+            if (Phaser.Geom.Rectangle.Overlaps(o.spawnBox, pRect)) {
+              console.log('[GameSegment._spawnEnemies] ' + o.name + ' to be spawned via spawnBox');         
+              entity = EntityFactory.makeOne(o); // will call place Entity
+              if (entity) {
+                objs.splice(io, 1);
+                console.log("objs' length now = " + objs.length);
+                this.enemies.push(entity);
+              }
+            }
+          })
         }
         
       });
     }    
+
+  /**
+   * Reads the 'spawnBox' custom property of a TiledObject in the EnemyLayer, 
+   * and processes it. 'Spawn Boxes' are used for enemies that must not behave
+   * in the regular way (that is, be spawned as soon as they enter the camera
+   * bounds). Instead, they are spawned when one of the players enter that
+   * specified box.
+   * 
+   * @param objs Array of TiledObjects
+   * @param enemyIndex Index of the Enemy containing the spawnBox field declaration
+   * @param boxId ID of the Rectangle pointed by the spawnBox field.
+   */
+  private _setEnemySpawnBox(objs: Phaser.Types.Tilemaps.TiledObject[], enemyIndex: integer, boxId: integer) {
+    let enemy = objs[enemyIndex];
+    objs.forEach((o, i) => {
+      if (o.id == boxId) {
+        let rect: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle(
+          o.x,
+          o.y,
+          o.width,
+          o.height
+        );
+        objs.splice(i, 1); // Eliminate Rectangle from the array
+        enemy.spawnBox = rect;
+      }
+    });
+  }
+  
 }

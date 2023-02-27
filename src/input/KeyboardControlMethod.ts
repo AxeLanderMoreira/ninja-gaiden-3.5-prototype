@@ -8,8 +8,10 @@ import ControlMethod from "./ControlMethod";
 export default class KeyboardControlMethod extends ControlMethod {
     static readonly DEFAULT_MAPPED_A_BUTTON = 'Z';
     static readonly DEFAULT_MAPPED_B_BUTTON = 'X';
+    static readonly DEFAULT_MAPPED_START_BUTTON = Phaser.Input.Keyboard.KeyCodes.ENTER;
     aKey: Phaser.Input.Keyboard.Key;
     bKey: Phaser.Input.Keyboard.Key;
+    startKey: Phaser.Input.Keyboard.Key;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private static s_instance: KeyboardControlMethod; // works as a singleton
     
@@ -36,6 +38,7 @@ export default class KeyboardControlMethod extends ControlMethod {
             case 'down': return Phaser.Input.Keyboard.JustDown(this.cursors.down);
             case 'left': return Phaser.Input.Keyboard.JustDown(this.cursors.left);
             case 'right': return Phaser.Input.Keyboard.JustDown(this.cursors.right);
+            case 'start': return Phaser.Input.Keyboard.JustDown(this.startKey);
             default: return false;
         }
     };
@@ -48,14 +51,16 @@ export default class KeyboardControlMethod extends ControlMethod {
             case 'down': return this.cursors.down.isDown;
             case 'left': return this.cursors.left.isDown;
             case 'right': return this.cursors.right.isDown;
+            case 'start': return this.startKey.isDown;
             default: return false;
         }
     };
 
     // redefined from base class
     resetScene(scene: Phaser.Scene) {
-        this.aKey = scene.input.keyboard.addKey(KeyboardControlMethod.DEFAULT_MAPPED_A_BUTTON); // A
-        this.bKey = scene.input.keyboard.addKey(KeyboardControlMethod.DEFAULT_MAPPED_B_BUTTON); // B 
+        this.aKey = scene.input.keyboard.addKey(KeyboardControlMethod.DEFAULT_MAPPED_A_BUTTON);
+        this.bKey = scene.input.keyboard.addKey(KeyboardControlMethod.DEFAULT_MAPPED_B_BUTTON);
+        this.startKey = scene.input.keyboard.addKey(KeyboardControlMethod.DEFAULT_MAPPED_START_BUTTON);
         this.cursors = scene.input.keyboard.createCursorKeys();
     }
 

@@ -9,6 +9,7 @@ import ControlMethod from "../input/ControlMethod";
 import KeyboardControlMethod from "../input/KeyboardControlMethod";
 import GamepadControlMethod from "../input/GamepadControlMethod";
 import VirtualPadControlMethod from "../input/VirtualPadControlMethod";
+import { Acts } from "./Acts";
 
 function arrayRotate(arr: any[], reverse: boolean) {
     if (reverse) arr.unshift(arr.pop());
@@ -45,8 +46,6 @@ export default class MenuScreen extends BaseScene {
     ctrlIcons: Phaser.GameObjects.Sprite[];
     numPlayersSelected: integer;
     playerFaces: Phaser.GameObjects.Sprite[];    
-    //private static readonly START_LEVEL_NAME = 'Scene21Desert';
-    private static readonly START_LEVEL_NAME = 'Scene22A';
 
     /**
      * 
@@ -251,12 +250,16 @@ export default class MenuScreen extends BaseScene {
         }
         this.transitionInProgress = true;
         this.cameras.main.fadeOut(1000, 0, 0, 0, (_camera, _progress) => {
-            if (_progress >= 1) {                
-                this.scene.start(MenuScreen.START_LEVEL_NAME, {
-                    numPlayers: this.numPlayersSelected,
-                    ctrlMethods: this.ctrlMethods,
-                    assignedIndices: this.assignedIndices
-                });
+            if (_progress >= 1) {   
+                Acts.resetGame();
+                let sceneConfig = Acts.nextScene();
+                if (sceneConfig) {
+                    this.scene.start(sceneConfig.key, {
+                        numPlayers: this.numPlayersSelected,
+                        ctrlMethods: this.ctrlMethods,
+                        assignedIndices: this.assignedIndices
+                    });
+                }
             }
         });
     }

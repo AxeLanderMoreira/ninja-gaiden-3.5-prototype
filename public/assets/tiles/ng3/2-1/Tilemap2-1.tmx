@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="240" height="14" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="51">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="240" height="14" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="58">
  <editorsettings>
   <export target="Tilemap2-1.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="Tileset2-1.tsx"/>
- <tileset firstgid="33" name="Enemies" tilewidth="32" tileheight="32" tilecount="5" columns="5">
-  <image source="../../../EnemiesForPlacement.png" width="160" height="32"/>
+ <tileset firstgid="33" name="Enemies" tilewidth="32" tileheight="32" tilecount="10" columns="10">
+  <image source="../../../EnemiesForPlacement.png" width="320" height="32"/>
  </tileset>
- <tileset firstgid="38" name="PowerUp" tilewidth="16" tileheight="16" tilecount="12" columns="12">
+ <tileset firstgid="43" name="PowerUp" tilewidth="16" tileheight="16" tilecount="12" columns="12">
   <image source="../../../PowerUp.png" width="192" height="16"/>
  </tileset>
  <layer id="5" name="Background" width="240" height="14">
@@ -33,7 +33,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -52,9 +52,9 @@
   <object id="3" name="EnemyAlien" gid="33" x="645.364" y="68" width="32" height="32"/>
   <object id="4" name="EnemyAlien" gid="33" x="1325.5" y="74" width="32" height="32"/>
   <object id="5" name="EnemyAlien" gid="33" x="1613.67" y="144.333" width="32" height="32"/>
-  <object id="11" name="EnemyAlien" gid="2147483681" x="779.5" y="112" width="32" height="32">
+  <object id="11" name="EnemyAlien" gid="2147483681" x="780" y="112" width="32" height="32">
    <properties>
-    <property name="spawnOffsetX" type="int" value="384"/>
+    <property name="spawnBox" type="object" value="53"/>
    </properties>
   </object>
   <object id="13" name="EnemySoldier" gid="34" x="458" y="144" width="32" height="32"/>
@@ -62,35 +62,47 @@
   <object id="26" name="DroidBall" gid="35" x="1142" y="144" width="32" height="32"/>
   <object id="27" name="DroidBall" gid="35" x="208" y="112" width="32" height="32"/>
   <object id="28" name="EnemyAlien" gid="33" x="2542.08" y="144" width="32" height="32"/>
-  <object id="29" name="EnemyAlien" gid="2147483681" x="1997.92" y="144" width="32" height="32">
+  <object id="29" name="EnemyAlien" gid="2147483681" x="1990" y="144" width="32" height="32">
    <properties>
-    <property name="spawnOffsetX" type="int" value="384"/>
+    <property name="spawnBox" type="object" value="54"/>
    </properties>
   </object>
   <object id="30" name="EnemyAlien" gid="33" x="3436.08" y="144" width="32" height="32"/>
-  <object id="31" name="EnemyAlien" gid="2147483681" x="2891.92" y="144" width="32" height="32">
+  <object id="31" name="EnemyAlien" gid="2147483681" x="2580" y="144" width="32" height="32">
    <properties>
-    <property name="spawnOffsetX" type="int" value="384"/>
+    <property name="spawnBox" type="object" value="57"/>
    </properties>
   </object>
   <object id="32" name="DroidBall" gid="35" x="3241.67" y="114.667" width="32" height="32"/>
   <object id="33" name="DroidBall" gid="35" x="3363.67" y="114.667" width="32" height="32"/>
   <object id="47" name="ChopperClaw" gid="36" x="2570.67" y="1" width="32" height="32">
    <properties>
-    <property name="spawnOffsetX" type="int" value="192"/>
+    <property name="spawnBox" type="object" value="55"/>
     <property name="stopY" type="int" value="96"/>
    </properties>
   </object>
   <object id="48" name="ChopperClaw" gid="36" x="2698.67" y="1" width="32" height="32">
    <properties>
+    <property name="spawnBox" type="object" value="56"/>
     <property name="stopY" type="int" value="96"/>
    </properties>
   </object>
   <object id="49" name="WaspRobot" gid="37" x="1550" y="49.3333" width="32" height="32"/>
   <object id="50" name="WaspRobot" gid="37" x="754.667" y="48.6667" width="32" height="32"/>
+  <object id="52" name="EnemySoldier" gid="34" x="148" y="48" width="32" height="32"/>
+  <object id="53" x="972" y="1" width="32" height="144"/>
+  <object id="54" x="2182" y="0" width="32" height="144"/>
+  <object id="55" x="2615" y="64.5" width="32" height="80"/>
+  <object id="56" x="2648" y="65" width="32" height="80"/>
+  <object id="57" x="2772" y="-0.5" width="32" height="144"/>
  </objectgroup>
  <objectgroup id="3" name="Walls">
   <object id="10" name="Wall" x="528" y="32" width="16" height="112"/>
+  <object id="51" name="Exit" x="3804" y="128" width="20" height="16">
+   <properties>
+    <property name="next" value="Scene22A"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="4" name="Quicksand">
   <object id="15" name="Quicksand" x="329.5" y="144" width="133.5" height="30"/>
@@ -102,18 +114,18 @@
   <object id="24" name="Quicksand" x="3541.5" y="144" width="93" height="30"/>
  </objectgroup>
  <objectgroup id="6" name="PowerUps">
-  <object id="34" gid="38" x="128" y="100" width="16" height="16"/>
-  <object id="35" gid="39" x="592" y="32" width="16" height="16"/>
-  <object id="36" gid="38" x="1053.33" y="80" width="16" height="16"/>
-  <object id="37" gid="38" x="1505" y="78" width="16" height="16"/>
-  <object id="38" gid="38" x="2133" y="81" width="16" height="16"/>
-  <object id="39" gid="38" x="3313" y="50" width="16" height="16"/>
-  <object id="40" gid="41" x="3614" y="79" width="16" height="16"/>
-  <object id="41" gid="42" x="2667" y="75" width="16" height="16"/>
-  <object id="42" gid="43" x="1822" y="80" width="16" height="16"/>
-  <object id="43" gid="44" x="1259" y="76" width="16" height="16"/>
-  <object id="44" gid="45" x="2406" y="71" width="16" height="16"/>
-  <object id="45" gid="46" x="3024" y="72" width="16" height="16"/>
-  <object id="46" gid="47" x="735.455" y="65.4545" width="16" height="16"/>
+  <object id="34" gid="43" x="128" y="100" width="16" height="16"/>
+  <object id="35" gid="44" x="592" y="32" width="16" height="16"/>
+  <object id="36" gid="43" x="1053.33" y="80" width="16" height="16"/>
+  <object id="37" gid="43" x="1505" y="78" width="16" height="16"/>
+  <object id="38" gid="43" x="2133" y="81" width="16" height="16"/>
+  <object id="39" gid="43" x="3313" y="50" width="16" height="16"/>
+  <object id="40" gid="46" x="3614" y="79" width="16" height="16"/>
+  <object id="41" gid="47" x="2667" y="75" width="16" height="16"/>
+  <object id="42" gid="48" x="1822" y="80" width="16" height="16"/>
+  <object id="43" gid="49" x="1259" y="76" width="16" height="16"/>
+  <object id="44" gid="50" x="2406" y="71" width="16" height="16"/>
+  <object id="45" gid="51" x="3024" y="72" width="16" height="16"/>
+  <object id="46" gid="52" x="735.455" y="65.4545" width="16" height="16"/>
  </objectgroup>
 </map>

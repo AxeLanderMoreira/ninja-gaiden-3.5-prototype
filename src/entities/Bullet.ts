@@ -7,17 +7,16 @@ import Enemy from "./Enemy";
 import Entity from "./Entity";
 
 export default class Bullet extends Enemy {
-    parent: Enemy;
-    indestructible: boolean;
-    //vel: Phaser.Math.Vector2;
-    //acc: Phaser.Math.Vector2;
-    //maxVel: Phaser.Math.Vector2;
-    velX: number;
-    velY: number;
     accX: number;
     accY: number;
+    hasSpark: boolean;
+    indestructible: boolean;
     maxVelX: number;
-     maxVelY: number;
+    maxVelY: number;
+    parent: Enemy;
+    velX: number;
+    velY: number;
+    
 
     // Define 'off-screen time': time that a Bullet can stay off camera before
     // being removed effectively from game
@@ -31,9 +30,10 @@ export default class Bullet extends Enemy {
      * @param sprite 
      * @param offset 
      */
-    constructor(parent: Enemy, indestructible: boolean, sprite: Phaser.Physics.Arcade.Sprite, variant?: integer) {
+    constructor(parent: Enemy, sprite: Phaser.Physics.Arcade.Sprite, indestructible: boolean, hasSpark: boolean, variant?: integer) {
         super(parent.scene, sprite, variant);
         this.indestructible = indestructible;
+        this.hasSpark = hasSpark;
         this.parent = parent;
         this.sprite.body.allowGravity = false;
         this.sprite.setDepth(parent.sprite.depth + 1);
@@ -56,7 +56,7 @@ export default class Bullet extends Enemy {
         this.sprite.setPosition(pbody.x + offsetX,
                                 pbody.y + offsetY);
         this.sprite.setVisible(true);
-        this.setState('spark');
+        this.setState(this.hasSpark ? 'spark' : 'bullet');
     }
 
     gotHit(other:Entity): boolean {

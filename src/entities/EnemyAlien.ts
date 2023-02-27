@@ -24,7 +24,6 @@ export default class EnemyAlien extends Enemy {
     }
 
     readonly WALKING_SPEED = 80;
-    readonly DEBUG_PLACEMENT = false;
     static readonly JUMP_SPEED = -300; // Initial jump velocity Y
 
     /**
@@ -39,13 +38,7 @@ export default class EnemyAlien extends Enemy {
     constructor(scene: GameSegment, sprite: Phaser.Physics.Arcade.Sprite, variant?: integer) {
         super(scene, sprite, variant);
         this.setCustomHitbox(new Phaser.Geom.Rectangle(6, 0, 15, 32));
-        if (this.DEBUG_PLACEMENT) {
-            this.sprite.body.allowGravity = false;
-            return;
-        }
         this.sprite.setGravityY(0, Globals.GRAVITY / 2); // have a more "floaty" jump
-        this.setState('jump');
-        console.log("[EnemyAlien constructor] this.facing = " + this.facing);
     }
 
     onBeginState(oldState: string, newState: string): void {
@@ -66,11 +59,32 @@ export default class EnemyAlien extends Enemy {
 
     }
 
+    // TODO Not working fine yet
+    /**
+     * Checks if this EnemyAlien progress is blocked by a tile ahead, in which 
+     * case it will jump.
+     * @returns true if blocked
+     */
+    private _checkBlockedByTile():  boolean {
+        let _x = this.sprite.x + (this.facing * this.sprite.body.halfWidth); // 1/2 body ahead if facing forward, 1/2 body backwards otherwise
+        let _y = this.sprite.y + 8;//this.sprite.body.halfHeight;
+        let tilemapLayer = this.scene.getMapPlatformLayer();
+        let tile = tilemapLayer.getTileAtWorldXY(_x, _y);
+        //console.log('[EnemyAlien.checkBlockedByTile] _x = ' + _x + ', _y = ' + _y);
+        //console.log('[EnemyAlien.checkBlockedByTile] tile == null ? '+ (tile == null) );
+        // TODO May need a more sophisticate check, actually if the tile has
+        // collision enabled (via TileMapLayer.setCollision/setCollisionBetween etc)
+        return (tile != null);
+    }
+
+    setMapPosition(x: number, y: number): void {
+        // At this point, we know the correct facing has been determined
+        super.setMapPosition(x, y);
+        this.setState('jump');
+    }
+
     update(): void {
         super.update();
-        if (this.DEBUG_PLACEMENT) {
-            return;
-        }
         const body : Phaser.Physics.Arcade.Body = this.sprite.body;
         switch(this.state) {
             case 'jump':
@@ -83,7 +97,7 @@ export default class EnemyAlien extends Enemy {
                 }
                 break;
             case 'run':
-                if (!body.onFloor()) { // falling
+                if (this._checkBlockedByTile() || !body.onFloor()) { // falling
                     this.setState('jump');
                 } else if (body.onWall()) { // turning
                     this.turn(-this.facing);

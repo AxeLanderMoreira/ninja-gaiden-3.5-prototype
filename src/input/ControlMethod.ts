@@ -6,7 +6,7 @@
 export default abstract class ControlMethod {    
     /**
      * Checks if a D-PAD or action button is being helddown.
-     * @param btn May be 'a', 'b', 'up', 'down', 'left', 'right'
+     * @param btn May be 'a', 'b', 'up', 'down', 'left', 'right', 'start'
      * @returns true if the button in question is being pressed (that is,
      * regardless of its state in the immediately previous frame).
      */

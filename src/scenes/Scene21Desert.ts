@@ -37,7 +37,6 @@ import GameSegment from "./GameSegment";
 export default class Scene21Desert extends GameSegment {
     readonly LEVEL_WIDTH = Globals.SCREEN_WIDTH * 10; // 10 consecutive screens
     readonly BG_COLOR = '#7c0800';
-    readonly TIME_TO_BEAT = 250000; // Time to beat this level, in seconds
     cloudLayer: Phaser.GameObjects.TileSprite;
     mountainLayer: Phaser.GameObjects.TileSprite;
     bgRuins: Phaser.GameObjects.TileSprite;
@@ -62,7 +61,6 @@ export default class Scene21Desert extends GameSegment {
     create(ctx?: any) {
         console.log('[Scene21Desert.create] BEGIN');
         super.create(ctx);
-        this.initialTimerValue = this.TIME_TO_BEAT;
         this.quicksandPuddles = [];
         this.cloudLayer = this.add.tileSprite(0, 0, this.LEVEL_WIDTH, 90, 'clouds');
         this.mountainLayer = this.add.tileSprite(0, 18, this.LEVEL_WIDTH, 90, 'mountains');
@@ -78,7 +76,7 @@ export default class Scene21Desert extends GameSegment {
         this.fgRuins.setScrollFactor(1.5);
         this.fgRuins.setDepth(Globals.PLATFORM_DEPTH + 2);
 
-        this.cameras.main.setBounds(0, 0, this.LEVEL_WIDTH, 216); // TODO get from a single configuration
+        this.cameras.main.setBounds(0, 0, this.LEVEL_WIDTH, Globals.SCREEN_HEIGHT); // TODO get from a single configuration
         this.cameras.main.setBackgroundColor(this.BG_COLOR);
 
         this.map = this.make.tilemap({key: 'map2-1'});
@@ -155,10 +153,11 @@ export default class Scene21Desert extends GameSegment {
             onQuicksand = this.physics.overlap(player.sprite, this.quicksandBoxes);
             player.setQuicksand(onQuicksand);
         });
-        this.cloudLayer.setTilePosition(time/100);
+        // time argument is not reliable across pauses
+        this.cloudLayer.setTilePosition(this.getElapsedTime()/100);
         // TODO Check for only the ones visible in the vicinity
         this.quicksandPuddles.forEach(obj => {
-            obj.tileSprite.setTilePosition(0, -time/100);
+            obj.tileSprite.setTilePosition(0, -this.getElapsedTime()/100);
         });
     }
 }

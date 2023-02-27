@@ -18,6 +18,7 @@ export class Globals {
     static readonly POWER_UP_DEPTH = 250;
     static readonly PLATFORM_DEPTH = 300;
     static readonly ENEMY_DEPTH = 400; // previous value was 100, but hovering enemies must be on top of platforms
+    static readonly EXPLOD_DEPTH = 500;
     static readonly HUD_DEPTH = 1000;
     static readonly VIRTUAL_CONTROLS_DEPTH = 2000;
 
@@ -30,6 +31,7 @@ export class Globals {
     /**
      * Debug options
      */
+    static readonly DEBUG_BOXES = false;
     static readonly DEBUG_FPS = true;
-    
+    static readonly DEBUG_NO_ENEMIES = false;    
 }

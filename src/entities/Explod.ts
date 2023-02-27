@@ -3,6 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+import { Globals } from "../Globals";
 import GameSegment from "../scenes/GameSegment";
 import Entity from "./Entity";
 
@@ -48,12 +49,14 @@ export default class Explod {
         let spr:Phaser.Physics.Arcade.Sprite = this.scene.physics.add.sprite(this.x, this.y, 'explod');
         spr.anims.play('explod.explod');
         spr.body.allowGravity = false;
+        spr.setDepth(Globals.EXPLOD_DEPTH);
         this.sprites.push(spr);
         // 1-4. Diagonal shockwaves
         for (let i = 0; i < 4; i++) {
             spr = this.scene.physics.add.sprite(this.x, this.y, 'explod');
             spr.anims.play('explod.shockwave');
             spr.body.allowGravity = false;
+            spr.setDepth(Globals.EXPLOD_DEPTH);
             let flipX: boolean = (i >= 2);
             let flipY: boolean = (i % 2) == 0;
             spr.setFlip(flipX, flipY); // up-right     

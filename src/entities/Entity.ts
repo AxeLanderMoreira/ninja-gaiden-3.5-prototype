@@ -124,7 +124,22 @@ export default abstract class Entity {
         this.customHitbox = rect;
         this.sprite.body.setSize(rect.width, rect.height);
         this._recalculateOffset();
-    }    
+    }
+
+    /**
+     * Invoked from EntityFactory, after an Entity is constrcuted, to finally
+     * place it at some coordinate in the map.
+     * Can be overridden by any Entity subclass that wants to change the 
+     * behavior or make additional handling.
+     * 
+     * @param x 
+     * @param y 
+     */
+    setMapPosition(x: number, y: number) {
+        let _x = x + this.sprite.width / 2;
+        let _y = y - this.sprite.height / 2;
+        this.sprite.setPosition(_x, _y);
+    }
 
     /**
      * 
@@ -136,7 +151,7 @@ export default abstract class Entity {
             console.log("already in state " + state + " - no change");
             return;
         }
-        this.stateT0 = this.scene.time.now;
+        this.stateT0 = this.scene.getElapsedTime();
         //console.log('T0 on setState = ' + this.stateT0);
         this.onEndState(this.state, state);
         let oldState = this.state;
@@ -175,7 +190,7 @@ export default abstract class Entity {
     }
 
     public getStateTime() {
-        return this.scene.time.now - this.stateT0;
+        return this.scene.getElapsedTime() - this.stateT0;
     }
 
     private _recalculateOffset() {

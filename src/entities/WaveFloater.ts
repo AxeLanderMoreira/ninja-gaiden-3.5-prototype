@@ -39,9 +39,13 @@ export default class WaveFloater extends Enemy {
         super(scene, sprite, variant);
         this.hovering = true;
         this.sprite.body.allowGravity = false;
-        //this.sprite.setMaxVelocity(WaspRobot.MAX_HOVER_X_SPEED, WaspRobot.MAX_HOVER_Y_SPEED);
         this.sprite.setMaxVelocity(WaveFloater.HOVER_X_SPEED, WaveFloater.MAX_HOVER_Y_SPEED);
         this.setState('fly');
+    }
+
+    setMapPosition(x: number, y: number) {
+        super.setMapPosition(x, y);
+        this._lockOnNearestPlayer();
     }
 
     /**
@@ -52,23 +56,19 @@ export default class WaveFloater extends Enemy {
     private _lockOnNearestPlayer() {
         let player: Ninja = this.getNearestPlayer();
         this.player = player;
-        let _x = this.sprite.body.x;
-        let _y = player.sprite.body.y;
+        let _x = this.sprite.x;
+        //let _y = player.sprite.body.y;
+        let _y = this.sprite.y; // Uncomment above to lock-on to player position upon spawning
+                                     // TODO Must implement better tracking
         this.lockedY = _y;
-        this.sprite.setPosition(_x, _y);         
+        this.sprite.setPosition(_x, _y);     
+        console.log('[WaveFloater._lockOnNearestPlayer] this.lockedY = ' + this.lockedY)    
         console.log('[WaveFloater._lockOnNearestPlayer] this.facing = ' + this.facing)
         this.sprite.setVelocityX(this.facing * WaveFloater.HOVER_X_SPEED);
         this.vmove = -1;
     }
 
     onBeginState(oldState: string, newState: string): void {
-        switch(newState) {
-            case 'fly': 
-                this._lockOnNearestPlayer();
-                break;
-            default:
-                break;            
-        }
         super.onBeginState(oldState, newState);
     }        
 

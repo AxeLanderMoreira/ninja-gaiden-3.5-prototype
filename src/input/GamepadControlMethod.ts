@@ -13,6 +13,7 @@ export default class GamepadControlMethod extends ControlMethod {
     currStatus: any;
     private static s_instances: GamepadControlMethod[];
     index: integer;
+    startBtn?: Phaser.Input.Gamepad.Button;
     
     private constructor(scene: Phaser.Scene, index: integer) {
         console.log('[GamepadControlMethod] constructor - IN');
@@ -25,7 +26,8 @@ export default class GamepadControlMethod extends ControlMethod {
             up: false,
             down: false,
             left: false,
-            right: false
+            right: false,
+            start: false
         };
         this.prevStatus = {
             a: false,
@@ -33,8 +35,12 @@ export default class GamepadControlMethod extends ControlMethod {
             up: false,
             down: false,
             left: false,
-            right: false
+            right: false,
+            start: false
         };
+        if (this.pad.buttons.length > 9) {
+            this.startBtn = this.pad.buttons[9];
+        }
         console.log('[GamepadControlMethod] constructor - OUT');
     };
 
@@ -66,14 +72,23 @@ export default class GamepadControlMethod extends ControlMethod {
 
     update():void {
         //console.log('[GamepadControlMethod.update] IN');
-        this.prevStatus = this.currStatus;
+        this.prevStatus = {
+            a: this.currStatus.a,
+            b: this.currStatus.b,
+            up: this.currStatus.up,
+            down: this.currStatus.down,
+            left: this.currStatus.left,
+            right: this.currStatus.right,
+            start: this.currStatus.start,
+        }
         this.currStatus = {
             a: this.pad.A,
             b: this.pad.B,
             up: (this.pad.up) || (this.pad.leftStick.y < -.1),
             down: (this.pad.down) || (this.pad.leftStick.y > .1),
             left: (this.pad.left) || (this.pad.leftStick.x < -.1),
-            right: (this.pad.right) || (this.pad.leftStick.x > .1)
+            right: (this.pad.right) || (this.pad.leftStick.x > .1),
+            start: this.startBtn ? this.startBtn.pressed : false
         }
     };
 }

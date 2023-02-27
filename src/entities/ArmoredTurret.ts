@@ -12,21 +12,6 @@ import Ninja from "./Ninja";
 /**
  * 
  */
-/*export class TurretBullet extends Enemy { 
-    // Create a Bullet super-class and extend it if necessary
-    constructor(parent: ArmoredTurret, sprite: Phaser.Physics.Arcade.Sprite, variant?: integer) {
-        super(parent.scene, sprite, variant);
-    }
-
-    onEndState(state: string, newState: string) {
-        // TODO Implement
-    }
-    
-}*/
-
-/**
- * 
- */
 export default class ArmoredTurret extends Enemy {
     static readonly TIME_TO_OPEN = 2000; // Time to remain closed, in milliseconds
     // 3000 just for test purposes? Actually 1000?
@@ -56,7 +41,7 @@ export default class ArmoredTurret extends Enemy {
         scene.load.spritesheet('turret_bullet', 'assets/TurretBullet.png', {
             frameWidth: 9,
             frameHeight: 12
-        })
+        });
     }
 
     constructor(scene: GameSegment, sprite: Phaser.Physics.Arcade.Sprite, variant?: integer) {
@@ -83,7 +68,7 @@ export default class ArmoredTurret extends Enemy {
     private _fire() {
         this.bulletsShot++;
         let sprite = this.scene.enemyGroup.create(0, 0, 'turret_bullet');        
-        let bullet = new Bullet(this, false, sprite);
+        let bullet = new Bullet(this, sprite, false, true);
         sprite.setData('type', 'TurretBullet');
         sprite.setData('parent', bullet);
         bullet.fire(0, 14, ArmoredTurret.BULLET_SPEED, 0);
@@ -111,8 +96,7 @@ export default class ArmoredTurret extends Enemy {
                 // TODO Implement
                 //this._fire();
                 this.timedEvent = this.scene.time.delayedCall(ArmoredTurret.OPEN_FIRE_DELAY, () => {
-                    this._fire();
-                    
+                    this._fire();                    
                 });
                 break;
             default:

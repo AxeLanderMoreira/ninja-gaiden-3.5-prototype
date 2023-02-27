@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import ControlMethod from "../input/ControlMethod";
+import { Acts } from "../scenes/Acts";
 import GameSegment from "../scenes/GameSegment";
 import Entity from "./Entity";
 import PowerUp from "./PowerUp";
@@ -13,7 +14,10 @@ export default class Ninja extends Entity {
     static rect2: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
 
     sword: Phaser.Physics.Arcade.Sprite;    
+    static readonly BODY_WIDTH = 20;
+    static readonly BODY_HEIGHT = 32;
     static readonly WALKING_SPEED = 96;
+    static readonly CLIMBING_SPEED = 64;
     static readonly LEDGE_MOVING_SPEED = 48;
     static readonly QUICKSAND_WALKING_SPEED = 32;
     static readonly QUICKSAND_FALLING_SPEED = 8;
@@ -55,7 +59,7 @@ export default class Ninja extends Entity {
     powerUp: boolean; // sword is powered up   
     quicksand: boolean;
     timedEvent?: Phaser.Time.TimerEvent;     
-    wall?: Phaser.GameObjects.GameObject; /**< the wall the ninja is currently sticked to/climbing */    
+    wall?: Phaser.GameObjects.GameObject; /**< the wall the ninja is currently sticked to/climbing */
 
     /**
      * 
@@ -75,6 +79,7 @@ export default class Ninja extends Entity {
             scene.createAnim(key, 0, 'jump_reach', {frames: [25]}, 200, -1);
             scene.createAnim(key, 0, 'jump_slash', {start: 16, end: 18}, Ninja.SLASH_SPEED, 0);
             scene.createAnim(key, 0, 'jump_sommersault', {start: 10, end: 13}, 400, -1);
+            scene.createAnim(key, 0, 'koed', {frames: [9]}, 200, -1); /* same as get_hit */
             scene.createAnim(key, 0, 'run', {frames: [6, 7, 8, 7]}, 300, -1);
             scene.createAnim(key, 0, 'stand_idle', {start: 0, end: 1}, 200, -1);
             scene.createAnim(key, 0, 'stand_slash', {start: 2, end: 4}, Ninja.SLASH_SPEED, 0);
@@ -89,11 +94,11 @@ export default class Ninja extends Entity {
     static preloadResources (scene: GameSegment) {
         scene.load.spritesheet('ninja0', 'assets/Ninja.png', {
             frameWidth: 36,
-            frameHeight: 37
+            frameHeight: 36
         });
         scene.load.spritesheet('ninja1', 'assets/Player2.png', {
             frameWidth: 36,
-            frameHeight: 37
+            frameHeight: 37 // TODO fix sprites of players 2-4 later
         });
         scene.load.spritesheet('ninja2', 'assets/Player3.png', {
             frameWidth: 36,
@@ -122,22 +127,26 @@ export default class Ninja extends Entity {
      * @param sprite 
      * @param sword 
      */
-    respawn(sprite: Phaser.Physics.Arcade.Sprite, sword: Phaser.Physics.Arcade.Sprite) {    
+    respawn(sprite: Phaser.Physics.Arcade.Sprite, sword: Phaser.Physics.Arcade.Sprite, keepStats?: boolean) {    
         this.sprite = sprite;
         this.sword = sword;
         sprite.setData('parent', this);
         sword.setData('parent', this);                
         // TODO Line below will not needed once I figure out best way to 
         // implement setCustomHitbox
-        sprite.setSize(20, 36);
-        this.state = "stand_idle";        
-        this.powerUp = false; //true; 
-        this.hp = this.maxHp = Ninja.MAX_HP;
-        this.mana = Ninja.INITIAL_MANA;
-        this.maxMana = Ninja.INITIAL_MAX_MANA;        
+        //sprite.setSize(20, 36);
+        sprite.setSize(Ninja.BODY_WIDTH, Ninja.BODY_HEIGHT);
+        sprite.body.offset.y = 4;
+        this.state = "stand_idle";
+        if (!keepStats) {
+            this.hp = this.maxHp = Ninja.MAX_HP;
+            this.powerUp = false; //true; 
+            this.mana = Ninja.INITIAL_MANA;
+            this.maxMana = Ninja.INITIAL_MAX_MANA;  
+            this.currentPower = PowerUp.STAR;
+        } 
         this.turn(1); // turn, right      
-        this.invincible = false;
-        this.currentPower = PowerUp.STAR;
+        this.invincible = false;        
     }
 
     drawSword() {
@@ -210,6 +219,9 @@ export default class Ninja extends Entity {
                 this.sprite.setVelocity(0, 0);
                 this.sprite.setAcceleration(0);
                 this.jumping = false;
+                break;
+            case "koed":
+                ninjaBody.allowGravity = false;
                 break;
             case "jump_descend":
                 //this.setCustomHitbox(new Phaser.Geom.Rectangle(11,6,14,28));
@@ -285,6 +297,9 @@ export default class Ninja extends Entity {
             case "crouch_slash":
                 this.sprite.off("animationcomplete");
                 this.undrawSword();
+                break;
+            case 'get_hit':
+                this.setTimedInvincibility();
                 break;
             case "jump_descend":
                 this.ledgeBottomOut = undefined; // reset flag after dropping off a ledge
@@ -415,6 +430,7 @@ export default class Ninja extends Entity {
             this.timedEvent.remove();
             delete this.timedEvent;
         }
+        this.setState('koed');
         this.scene.onPlayerKOed(this);
     }
 
@@ -425,6 +441,28 @@ export default class Ninja extends Entity {
     stillGrabbingLedge(ledge: Phaser.GameObjects.GameObject) {
         return this.scene.physics.overlap(this.sprite, ledge);
     }
+
+    onTouchedExit(_platform: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+        //let nextLevel:string = _platform.getData("next");
+        let sceneConfig = Acts.nextScene();
+        let nextLevel: string;
+        if (sceneConfig) {
+            nextLevel = sceneConfig.key;
+        }
+        console.log('NINJA EXIT!!! => ' + nextLevel);        
+        if (nextLevel) {
+            this.scene.scene.start(nextLevel, { 
+                ctrlMethods: this.scene.ctrlMethods,
+                numPlayers: this.scene.numPlayers,
+                assignedIndices: this.scene.assignedIndices,
+                players: this.scene.players,
+                currTimerValue: this.scene.currTimerValue,
+                keepStats: true
+            });
+        } else {
+            // Cutscene and next Act...?
+        }
+    }  
 
     /**
      * Invoked whenever there is an overlap between the Ninja and a ledge.
@@ -465,10 +503,7 @@ export default class Ninja extends Entity {
 
     onTouchedWall(wall: Phaser.GameObjects.GameObject, direction: integer) {
         if (this.jumping) { // include get_hit
-            this.turn(direction);
-            if (this.state == 'get_hit') {
-                this.setTimedInvincibility();
-            }                    
+            this.turn(direction);  
             this.setState('climb_idle');
             this.wall = wall; // wall being climbed
         }
@@ -533,7 +568,7 @@ Características de quando cai na areia movediça:
 
     updateSwordSprite(ninjaBody : Phaser.Physics.Arcade.Body, swordBody : Phaser.Physics.Arcade.Body) {
         const offset_x = this.slash_offset[this.state].x;
-        const offset_y = this.slash_offset[this.state].y;
+        const offset_y = this.slash_offset[this.state].y - this.sprite.body.offset.y;
         console.log("sword anim frame = " + this.sword.anims.currentFrame.index);
         if (this.facing > 0) {  // facing right
             this.sword.setFlipX(false);
@@ -596,10 +631,10 @@ Características de quando cai na areia movediça:
                     if (this.reachedWallTop()) {
                         break;
                     }
-                    this.sprite.setVelocityY(-Ninja.WALKING_SPEED);
+                    this.sprite.setVelocityY(-Ninja.CLIMBING_SPEED);
                     this.setState('climb_move');
                 } else if (ctrl.held('down')) {
-                    this.sprite.setVelocityY(Ninja.WALKING_SPEED);
+                    this.sprite.setVelocityY(Ninja.CLIMBING_SPEED);
                     this.setState('climb_move');
                 }
                 break;
@@ -637,10 +672,10 @@ Características de quando cai na areia movediça:
                     }
                 } else if (ctrl.held('up')) {
                     idle = false;
-                    this.sprite.setVelocityY(-Ninja.WALKING_SPEED);
+                    this.sprite.setVelocityY(-Ninja.CLIMBING_SPEED);
                 } else if (ctrl.held('down')) {
                     idle = false;
-                    this.sprite.setVelocityY(Ninja.WALKING_SPEED);
+                    this.sprite.setVelocityY(Ninja.CLIMBING_SPEED);
                 }
                 if (idle) {
                     this.setState('climb_idle');
@@ -669,11 +704,10 @@ Características de quando cai na areia movediça:
                 this._testSwordHit();
                 break;
             case 'get_hit':
-                //console.log('[Ninja.update(get_hit)] this.getStateTime() = ' + this.getStateTime());
-                //console.log('[Ninja.update(get_hit)] sprite.body.velocity.y now = ' + this.sprite.body.velocity.y);
-                if (this.getStateTime() > 0 && ninjaBody.velocity.y >= 0 && this.onFloor()) { // descent
-                    this.setState('stand_idle'); 
-                    this.setTimedInvincibility();                    
+                if (this.fellOutOfBounds()) {
+                    this.loseLife();
+                } else if (this.getStateTime() > 0 && ninjaBody.velocity.y >= 0 && this.onFloor()) { // descent
+                    this.setState('stand_idle');
                 }
                 break;
             case 'grab_idle':
