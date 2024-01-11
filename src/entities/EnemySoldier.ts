@@ -9,7 +9,6 @@ import Enemy from "./Enemy";
 export default class EnemySoldier extends Enemy {
 
     readonly WALKING_SPEED = 24;
-    edgeBox?: Phaser.GameObjects.Rectangle;
 
     static initAnims (scene: GameSegment) {
         scene.createAnim('enemy_soldier', 0, 'walk', {start: 0, end: 1}, 600, -1);
