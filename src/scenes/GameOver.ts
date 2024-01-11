@@ -10,12 +10,10 @@ import SpriteFont from "../menus/SpriteFont";
 export default class GameOver extends BaseScene {
     font: SpriteFont;
     kbPlugin: Phaser.Input.Keyboard.KeyboardPlugin;
-    msgGlyphs: Phaser.GameObjects.Sprite[];
     padPlugin: Phaser.Input.Gamepad.GamepadPlugin;    
     
     constructor() {
         super('GameOver');
-        this.msgGlyphs = [];
     }
     
     create(data?: any) {

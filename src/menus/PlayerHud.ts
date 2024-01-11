@@ -5,7 +5,6 @@
 
 import Ninja from "../entities/Ninja";
 import { Globals } from "../Globals";
-import GameSegment from "../scenes/GameSegment";
 import Hud from "./Hud";
 import SpriteFont from "./SpriteFont";
 

@@ -8,7 +8,7 @@ import GameSegment from "../scenes/GameSegment";
 import SpriteFont from "./SpriteFont";
 
 export default abstract class Hud {    
-    scene: GameSegment;
+    scene: Phaser.Scene;
     bounds: Phaser.Geom.Rectangle;
     container: Phaser.GameObjects.Container;
     font: SpriteFont;
@@ -18,7 +18,7 @@ export default abstract class Hud {
      * @param scene 
      * @param bounds 
      */
-    constructor(scene: GameSegment, bounds: Phaser.Geom.Rectangle) {
+    constructor(scene: Phaser.Scene, bounds: Phaser.Geom.Rectangle) {
         this.scene = scene;
         this.bounds = bounds;
         this.font = new SpriteFont(this.scene);

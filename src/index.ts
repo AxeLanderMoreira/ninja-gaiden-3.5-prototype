@@ -16,6 +16,6 @@ import TitleScreen from './scenes/TitleScreen';
 
 new Phaser.Game(
   Object.assign(config, {
-    scene: [TitleScreen, MenuScreen, PauseScreen, Scene21Desert, Scene22A, Scene22B, GameOver]
+    scene: [TitleScreen, MenuScreen, Scene21Desert, Scene22A, Scene22B, PauseScreen, GameOver]
   })
 );
